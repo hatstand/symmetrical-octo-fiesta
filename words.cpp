@@ -10,6 +10,7 @@
 #include "knearest.h"
 
 static const int kGridSize = 15;
+static const int kTabletSize = 7;
 
 enum SpecialSquare {
   TL = 0,
@@ -111,6 +112,24 @@ void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
   }
 }
 
+std::vector<char> RecogniseTablet(const cv::Mat& image, KNearest* nearest) {
+  const int grid_start = image.size().height / 4;
+  const int square_width = image.size().width / kGridSize;
+  int fudge = 24;
+  int estimate = grid_start + square_width * kGridSize + fudge;
+  int guess = estimate + square_width * 2 + fudge;
+  const int tablet_width = image.size().width / 7;
+  std::vector<char> ret;
+  for (int i = 0; i < kTabletSize; ++i) {
+    cv::Point top_left(i * tablet_width, estimate);
+    cv::Point bottom_right(i * tablet_width + tablet_width, guess);
+
+    cv::Mat square(image, cv::Rect(top_left, bottom_right));
+    ret.push_back(Recognise(nearest, square));
+  }
+  return ret;
+}
+
 void RecogniseGrid(const std::string& path, KNearest* nearest) {
   cv::Mat image = cv::imread(path, 0);
   cv::bitwise_not(image, image);
@@ -138,6 +157,33 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
     }
     std::cout << std::endl;
   }
+
+  /*
+  int fudge = 24;
+  int estimate = grid_start + square_width * kGridSize + fudge;
+  int guess = estimate + square_width * 2 + fudge;
+  cv::line(image, cv::Point(0, estimate),
+           cv::Point(image.size().width, estimate), CV_RGB(0, 0, 128));
+  cv::line(image, cv::Point(0, guess), cv::Point(image.size().width, guess),
+           CV_RGB(0, 0, 128));
+
+  const int tablet_width = image.size().width / 7;
+  for (int i = 0; i < kTabletSize; ++i) {
+    cv::line(image, cv::Point(i * tablet_width, estimate),
+             cv::Point(i * tablet_width, guess), CV_RGB(0, 0, 128));
+  }
+
+  cv::resize(image, image,
+             cv::Size(image.size().width / 2, image.size().height / 2));
+  cv::imshow("foo", image);
+  cv::waitKey(0);
+  */
+  std::vector<char> tablet = RecogniseTablet(image, nearest);
+  std::cout << "TABLET:" << std::endl;
+  for (char c : tablet) {
+    std::cout << c << " ";
+  }
+  std::cout << std::endl;
 }
 
 int main(int argc, char** argv) {
