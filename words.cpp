@@ -8,6 +8,7 @@
 #include <highgui.h>
 
 #include "knearest.h"
+#include "scrabble.h"
 
 static const int kGridSize = 15;
 static const int kTabletSize = 7;
@@ -161,7 +162,7 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
   const int grid_start = image.size().height / 4;
   const int square_width = image.size().width / kGridSize;
 
-  char grid[kGridSize][kGridSize];
+  char* grid = static_cast<char*>(malloc(kGridSize * kGridSize));
 
   for (int i = 0; i < kGridSize; ++i) {
     for (int j = 0; j < kGridSize; ++j) {
@@ -172,43 +173,20 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
       cv::Point bottom_right(x + square_width, y + square_width);
 
       cv::Mat square(image, cv::Rect(top_left, bottom_right));
-      grid[i][j] = Recognise(nearest, square);
+      grid[i + kGridSize * j] = Recognise(nearest, square);
     }
   }
 
-  for (int i = 0; i < kGridSize; ++i) {
-    for (int j = 0; j < kGridSize; ++j) {
-      std::cout << grid[j][i];
-    }
-    std::cout << std::endl;
-  }
-
-  /*
-  int fudge = 24;
-  int estimate = grid_start + square_width * kGridSize + fudge;
-  int guess = estimate + square_width * 2 + fudge;
-  cv::line(image, cv::Point(0, estimate),
-           cv::Point(image.size().width, estimate), CV_RGB(0, 0, 128));
-  cv::line(image, cv::Point(0, guess), cv::Point(image.size().width, guess),
-           CV_RGB(0, 0, 128));
-
-  const int tablet_width = image.size().width / 7;
-  for (int i = 0; i < kTabletSize; ++i) {
-    cv::line(image, cv::Point(i * tablet_width, estimate),
-             cv::Point(i * tablet_width, guess), CV_RGB(0, 0, 128));
-  }
-
-  cv::resize(image, image,
-             cv::Size(image.size().width / 2, image.size().height / 2));
-  cv::imshow("foo", image);
-  cv::waitKey(0);
-  */
   std::vector<char> tablet = RecogniseTablet(image, nearest);
   std::cout << "TABLET:" << std::endl;
   for (char c : tablet) {
     std::cout << c << " ";
   }
   std::cout << std::endl;
+
+  Scrabble scrabble(grid);
+  scrabble.PrintBoard();
+  free(grid);
 }
 
 int main(int argc, char** argv) {
