@@ -1,11 +1,19 @@
 #ifndef SCRABBLE_H
 #define SCRABBLE_H
 
+#include <stdlib.h>
+#include <string.h>
+
 #include <vector>
 
 class Scrabble {
  public:
-  Scrabble(const char* board) : board_(board) {}
+  Scrabble(const char* board) {
+    board_ = static_cast<char*>(malloc(kGridSize * kGridSize));
+    memcpy(board_, board, kGridSize * kGridSize);
+  }
+
+  ~Scrabble() { free(board_); }
 
   void FindBestMove(const std::vector<char>& tablet);
 
@@ -18,7 +26,7 @@ class Scrabble {
   std::vector<std::pair<int, int>> FindAnchors() const;
 
   static const int kGridSize = 15;
-  const char* board_;
+  char* board_;
 };
 
 #endif  // SCRABBLE_H

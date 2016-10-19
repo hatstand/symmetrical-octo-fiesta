@@ -10,6 +10,9 @@ using std::make_pair;
 
 void Scrabble::FindBestMove(const std::vector<char>& tablet) {
   vector<pair<int, int>> anchors = FindAnchors();
+  for (const auto& anchor : anchors) {
+    board_[anchor.first + anchor.second * kGridSize] = 'A';
+  }
 }
 
 namespace {}
@@ -34,7 +37,7 @@ vector<pair<int, int>> Scrabble::FindAnchors() const {
 
 bool Scrabble::HasNeighbours(int i, int j) const {
   return HasPlacedTile(i - 1, j) || HasPlacedTile(i + 1, j) ||
-         HasPlacedTile(i, j - 1) || HasPlacedTile(j, j + 1);
+         HasPlacedTile(i, j - 1) || HasPlacedTile(i, j + 1);
 }
 
 bool Scrabble::HasPlacedTile(int i, int j) const {

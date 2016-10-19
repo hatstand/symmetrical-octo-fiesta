@@ -186,6 +186,8 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
 
   Scrabble scrabble(grid);
   scrabble.PrintBoard();
+  scrabble.FindBestMove(tablet);
+  scrabble.PrintBoard();
   free(grid);
 }
 
