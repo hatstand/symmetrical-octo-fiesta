@@ -142,39 +142,6 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
 
 int main(int argc, char** argv) {
   KNearest* nearest = Foo();
-  RecogniseGrid("words4.png", nearest);
-  cv::Mat words = cv::imread("words.png", 0);
-  cv::bitwise_not(words, words);
-
-  int grid_start = words.size().height / 4;
-
-  cv::line(words, cv::Point(0, grid_start),
-           cv::Point(words.size().width, grid_start), CV_RGB(0, 0, 128));
-
-  for (int i = 0; i < kGridSize; ++i) {
-    int x = (words.size().width / 15) * i;
-    cv::line(words, cv::Point(x, 0), cv::Point(x, words.size().height),
-             CV_RGB(0, 0, 128));
-
-    cv::line(words, cv::Point(0, x + grid_start),
-             cv::Point(words.size().width, x + grid_start), CV_RGB(0, 0, 128));
-  }
-
-  const int square_width = words.size().width / kGridSize;
-
-  for (int i = 0; i < kGridSize; ++i) {
-    for (int j = 0; j < kGridSize; ++j) {
-      int x = square_width * i;
-      int y = square_width * j + grid_start;
-
-      cv::Point top_left(x, y);
-      cv::Point bottom_right(x + square_width, y + square_width);
-
-      cv::Mat square(words, cv::Rect(top_left, bottom_right));
-      // train(square);
-      Recognise(nearest, square);
-    }
-  }
-
+  RecogniseGrid(argv[1], nearest);
   return 0;
 }
