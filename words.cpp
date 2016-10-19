@@ -1,3 +1,4 @@
+#include <dirent.h>
 #include <sys/stat.h>
 #include <sys/types.h>
 
@@ -5,6 +6,8 @@
 
 #include <cv.h>
 #include <highgui.h>
+
+#include "knearest.h"
 
 static const int kGridSize = 15;
 
@@ -44,6 +47,56 @@ void Train(const cv::Mat& image) {
   imwrite(filename, image);
 }
 
+void TrainDirectory(const std::string path, const std::string name,
+                    KNearest* knearest) {
+  DIR* training_directory = opendir(path.c_str());
+
+  dirent* directory_info = nullptr;
+  while ((directory_info = readdir(training_directory))) {
+    if (directory_info->d_type != DT_REG) {
+      continue;
+    }
+    std::string file_path = path + "/";
+    file_path += directory_info->d_name;
+    cv::Mat image = cv::imread(file_path, 0);
+    std::cout << file_path << std::endl;
+    knearest->Learn(image, *path.rbegin());
+  }
+  closedir(training_directory);
+}
+
+KNearest* Foo() {
+  DIR* training_directory = opendir("training");
+
+  dirent* directory_info = nullptr;
+  KNearest* knearest = new KNearest;
+  while ((directory_info = readdir(training_directory))) {
+    if (directory_info->d_type != DT_DIR) {
+      continue;
+    }
+    if (strcmp(directory_info->d_name, ".") == 0 ||
+        strcmp(directory_info->d_name, "..") == 0) {
+      continue;
+    }
+
+    std::string path("training/");
+    path += directory_info->d_name;
+
+    TrainDirectory(path, directory_info->d_name, knearest);
+  }
+  closedir(training_directory);
+
+  knearest->Train();
+  return knearest;
+}
+
+void Recognise(KNearest* nearest, const cv::Mat& image) {
+  char recognised = nearest->Recognise(image);
+  std::cout << "Recognised as: " << recognised << std::endl;
+  cv::imshow("foo", image);
+  cv::waitKey(0);
+}
+
 void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
   if (line[1] != 0) {
     float m = -1 / tan(line[1]);
@@ -57,6 +110,7 @@ void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
 }
 
 int main(int argc, char** argv) {
+  KNearest* nearest = Foo();
   cv::Mat words = cv::imread("words.png", 0);
   cv::bitwise_not(words, words);
 
@@ -85,7 +139,8 @@ int main(int argc, char** argv) {
       cv::Point bottom_right(x + square_width, y + square_width);
 
       cv::Mat square(words, cv::Rect(top_left, bottom_right));
-      Train(square);
+      // Train(square);
+      Recognise(nearest, square);
     }
   }
 
