@@ -24,9 +24,34 @@ void ShowImage(const cv::Mat& image) {
   cv::waitKey(0);
 }
 
-void Train(const cv::Mat& image) {
-  static int data_counter = 300;
+int GetNext(const std::string& path) {
+  DIR* dir = opendir(path.c_str());
 
+  int next = 0;
+
+  dirent* directory_info = nullptr;
+  while ((directory_info = readdir(dir))) {
+    std::string name(directory_info->d_name);
+    std::string number;
+    for (char c : name) {
+      if (c >= '0' && c <= '9') {
+        number += c;
+      } else {
+        break;
+      }
+    }
+    if (!number.empty()) {
+      int x = atoi(number.c_str());
+      if (x > next) {
+        next = x;
+      }
+    }
+  }
+  closedir(dir);
+  return next + 1;
+}
+
+void Train(const cv::Mat& image) {
   cv::imshow("foo", image);
   char key = static_cast<char>(cv::waitKey(0));
 
@@ -40,7 +65,7 @@ void Train(const cv::Mat& image) {
 
   std::cout << directory << std::endl;
 
-  std::string filename(directory + "/" + std::to_string(data_counter++) +
+  std::string filename(directory + "/" + std::to_string(GetNext(directory)) +
                        ".png");
 
   std::cout << filename << std::endl;
