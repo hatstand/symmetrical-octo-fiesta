@@ -92,6 +92,10 @@ KNearest* Foo() {
 
 char Recognise(KNearest* nearest, const cv::Mat& image) {
   char recognised = nearest->Recognise(image);
+  if (recognised == '?') {
+    // Didn't manage this one. Ask a human.
+    Train(image);
+  }
   return recognised;
 }
 
@@ -124,7 +128,6 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
       cv::Point bottom_right(x + square_width, y + square_width);
 
       cv::Mat square(image, cv::Rect(top_left, bottom_right));
-      // train(square);
       grid[i][j] = Recognise(nearest, square);
     }
   }
@@ -139,7 +142,7 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
 
 int main(int argc, char** argv) {
   KNearest* nearest = Foo();
-  RecogniseGrid("words2.png", nearest);
+  RecogniseGrid("words3.png", nearest);
   cv::Mat words = cv::imread("words.png", 0);
   cv::bitwise_not(words, words);
 
