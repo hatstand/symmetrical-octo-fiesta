@@ -142,7 +142,7 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
 
 int main(int argc, char** argv) {
   KNearest* nearest = Foo();
-  RecogniseGrid("words3.png", nearest);
+  RecogniseGrid("words4.png", nearest);
   cv::Mat words = cv::imread("words.png", 0);
   cv::bitwise_not(words, words);
 
