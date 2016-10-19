@@ -24,7 +24,7 @@ void ShowImage(const cv::Mat& image) {
 }
 
 void Train(const cv::Mat& image) {
-  static int data_counter = 0;
+  static int data_counter = 300;
 
   cv::imshow("foo", image);
   char key = static_cast<char>(cv::waitKey(0));
@@ -143,8 +143,6 @@ int main(int argc, char** argv) {
       Recognise(nearest, square);
     }
   }
-
-  ShowImage(words);
 
   return 0;
 }
