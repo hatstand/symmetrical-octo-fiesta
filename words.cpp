@@ -90,11 +90,9 @@ KNearest* Foo() {
   return knearest;
 }
 
-void Recognise(KNearest* nearest, const cv::Mat& image) {
+char Recognise(KNearest* nearest, const cv::Mat& image) {
   char recognised = nearest->Recognise(image);
-  std::cout << "Recognised as: " << recognised << std::endl;
-  cv::imshow("foo", image);
-  cv::waitKey(0);
+  return recognised;
 }
 
 void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
@@ -109,8 +107,39 @@ void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
   }
 }
 
+void RecogniseGrid(const std::string& path, KNearest* nearest) {
+  cv::Mat image = cv::imread(path, 0);
+  cv::bitwise_not(image, image);
+  const int grid_start = image.size().height / 4;
+  const int square_width = image.size().width / kGridSize;
+
+  char grid[kGridSize][kGridSize];
+
+  for (int i = 0; i < kGridSize; ++i) {
+    for (int j = 0; j < kGridSize; ++j) {
+      int x = square_width * i;
+      int y = square_width * j + grid_start;
+
+      cv::Point top_left(x, y);
+      cv::Point bottom_right(x + square_width, y + square_width);
+
+      cv::Mat square(image, cv::Rect(top_left, bottom_right));
+      // train(square);
+      grid[i][j] = Recognise(nearest, square);
+    }
+  }
+
+  for (int i = 0; i < kGridSize; ++i) {
+    for (int j = 0; j < kGridSize; ++j) {
+      std::cout << grid[j][i];
+    }
+    std::cout << std::endl;
+  }
+}
+
 int main(int argc, char** argv) {
   KNearest* nearest = Foo();
+  RecogniseGrid("words2.png", nearest);
   cv::Mat words = cv::imread("words.png", 0);
   cv::bitwise_not(words, words);
 
@@ -139,7 +168,7 @@ int main(int argc, char** argv) {
       cv::Point bottom_right(x + square_width, y + square_width);
 
       cv::Mat square(words, cv::Rect(top_left, bottom_right));
-      // Train(square);
+      // train(square);
       Recognise(nearest, square);
     }
   }
