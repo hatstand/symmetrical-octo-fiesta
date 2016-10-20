@@ -4,16 +4,19 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <memory>
 #include <vector>
+
+namespace dawgdic {
+class Dawg;
+class Dictionary;
+class Guide;
+}
 
 class Scrabble {
  public:
-  Scrabble(const char* board) {
-    board_ = static_cast<char*>(malloc(kGridSize * kGridSize));
-    memcpy(board_, board, kGridSize * kGridSize);
-  }
-
-  ~Scrabble() { free(board_); }
+  explicit Scrabble(const char* board);
+  ~Scrabble();
 
   void FindBestMove(const std::vector<char>& tablet);
 
@@ -24,9 +27,16 @@ class Scrabble {
   bool HasPlacedTile(int i, int j) const;
   bool HasPlacedTile(char c) const;
   std::vector<std::pair<int, int>> FindAnchors() const;
+  bool IsValidPlacement(char c, std::pair<int, int> pos) const;
+  std::string GetLeftConnectingCharacters(std::pair<int, int> pos) const;
+  std::string GetRightConnectingCharacters(std::pair<int, int> pos) const;
 
   static const int kGridSize = 15;
   char* board_;
+
+  std::unique_ptr<dawgdic::Dawg> dawg_;
+  std::unique_ptr<dawgdic::Dictionary> dictionary_;
+  std::unique_ptr<dawgdic::Guide> guide_;
 };
 
 #endif  // SCRABBLE_H

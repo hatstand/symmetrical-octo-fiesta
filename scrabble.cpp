@@ -17,10 +17,11 @@ using std::endl;
 using std::pair;
 using std::vector;
 using std::make_pair;
+using std::string;
 
 namespace {
 
-dawgdic::Dawg* BuildDAWG() {
+dawgdic::Dawg* BuildDawg() {
   dawgdic::DawgBuilder builder;
   std::string line;
   std::ifstream infile("/usr/share/dict/words");
@@ -82,15 +83,70 @@ void CompleteKeys(const dawgdic::Dictionary& dictionary,
 }
 }
 
+Scrabble::Scrabble(const char* board)
+    : board_(static_cast<char*>(malloc(kGridSize * kGridSize))),
+      dawg_(BuildDawg()),
+      dictionary_(BuildDictionary(*dawg_)),
+      guide_(BuildGuide(*dawg_, *dictionary_)) {
+  memcpy(board_, board, kGridSize * kGridSize);
+}
+
+Scrabble::~Scrabble() { free(board_); }
+
 void Scrabble::FindBestMove(const std::vector<char>& tablet) {
-  dawgdic::Dawg* dawg = BuildDAWG();
-  dawgdic::Dictionary* dictionary = BuildDictionary(*dawg);
-  dawgdic::Guide* guide = BuildGuide(*dawg, *dictionary);
-  CompleteKeys(*dictionary, *guide, "nua");
+  CompleteKeys(*dictionary_, *guide_, "nua");
   vector<pair<int, int>> anchors = FindAnchors();
   for (const auto& anchor : anchors) {
-    board_[anchor.first + anchor.second * kGridSize] = 'A';
+    for (char c : tablet) {
+      cout << "Trying: " << c << " at: " << anchor.first << "," << anchor.second
+           << endl;
+      cout << IsValidPlacement(c, anchor) << endl;
+    }
   }
+}
+
+bool Scrabble::IsValidPlacement(char c, pair<int, int> pos) const {
+  string left = GetLeftConnectingCharacters(pos);
+  string right = GetRightConnectingCharacters(pos);
+
+  string word = left + c + right;
+  cout << word << endl;
+
+  return dictionary_->Contains(word.c_str());
+}
+
+namespace {
+bool IsRealCharacter(char c) { return c >= 'a' && c <= 'z'; }
+}
+
+string Scrabble::GetLeftConnectingCharacters(pair<int, int> pos) const {
+  std::string ret;
+  int x = pos.first - 1;
+  int y = pos.second;
+  for (int i = x; i >= 0; --i) {
+    char c = board_[i + y * kGridSize];
+    if (IsRealCharacter(c)) {
+      ret.insert(ret.begin(), c);
+    } else {
+      return ret;
+    }
+  }
+  return ret;
+}
+
+string Scrabble::GetRightConnectingCharacters(pair<int, int> pos) const {
+  string ret;
+  int x = pos.first + 1;
+  int y = pos.second;
+  for (int i = x; i < kGridSize; ++i) {
+    char c = board_[i + y * kGridSize];
+    if (IsRealCharacter(c)) {
+      ret.push_back(c);
+    } else {
+      return ret;
+    }
+  }
+  return ret;
 }
 
 // Find valid points on the board to start a word from.
