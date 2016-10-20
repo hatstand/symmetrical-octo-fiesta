@@ -4,8 +4,7 @@
 
 #include <iostream>
 
-#include <cv.h>
-#include <highgui.h>
+#include <opencv2/highgui/highgui.hpp>
 
 #include "knearest.h"
 #include "scrabble.h"

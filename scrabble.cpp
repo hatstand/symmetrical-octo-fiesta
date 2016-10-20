@@ -15,8 +15,6 @@ void Scrabble::FindBestMove(const std::vector<char>& tablet) {
   }
 }
 
-namespace {}
-
 // Find valid points on the board to start a word from.
 vector<pair<int, int>> Scrabble::FindAnchors() const {
   vector<pair<int, int>> anchors;

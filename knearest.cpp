@@ -2,6 +2,8 @@
 
 #include <iostream>
 
+#include <opencv2/imgproc/imgproc.hpp>
+
 namespace {
 static const int kOcrMaxDistance = 60000;
 }
