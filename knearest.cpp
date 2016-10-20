@@ -9,7 +9,6 @@ static const int kOcrMaxDistance = 60000;
 }
 
 void KNearest::Learn(const cv::Mat& image, char c) {
-  std::cout << "Training: " << c << std::endl;
   responses_.push_back(cv::Mat(1, 1, CV_32F, (float)c));
   samples_.push_back(PrepareSample(image));
 }

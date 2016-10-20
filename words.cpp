@@ -63,12 +63,8 @@ void Train(const cv::Mat& image) {
   directory += key;
   mkdir(directory.c_str(), 0777);
 
-  std::cout << directory << std::endl;
-
   std::string filename(directory + "/" + std::to_string(GetNext(directory)) +
                        ".png");
-
-  std::cout << filename << std::endl;
 
   imwrite(filename, image);
 }
@@ -85,7 +81,6 @@ void TrainDirectory(const std::string path, const std::string name,
     std::string file_path = path + "/";
     file_path += directory_info->d_name;
     cv::Mat image = cv::imread(file_path, 0);
-    std::cout << file_path << std::endl;
     knearest->Learn(image, *path.rbegin());
   }
   closedir(training_directory);
