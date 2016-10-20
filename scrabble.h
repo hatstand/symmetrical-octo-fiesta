@@ -32,6 +32,9 @@ class Scrabble {
   std::string GetRightConnectingCharacters(std::pair<int, int> pos) const;
   std::string GetUpConnectingCharacters(std::pair<int, int> pos) const;
   std::string GetDownConnectingCharacters(std::pair<int, int> pos) const;
+  void ExpandLeft(std::string s, std::pair<int, int> pos,
+                  const std::vector<char>& tiles) const;
+  bool CrossCheck(std::string s, std::pair<int, int> pos) const;
 
   static const int kGridSize = 15;
   char* board_;

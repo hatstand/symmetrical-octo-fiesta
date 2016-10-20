@@ -69,17 +69,18 @@ void FindPrefixKeys(const dawgdic::Dictionary& dictionary,
   cout << endl;
 }
 
-void CompleteKeys(const dawgdic::Dictionary& dictionary,
-                  const dawgdic::Guide& guide, const std::string& s) {
+vector<string> CompleteKeys(const dawgdic::Dictionary& dictionary,
+                            const dawgdic::Guide& guide, const std::string& s) {
   dawgdic::Completer completer(dictionary, guide);
   dawgdic::BaseType index = dictionary.root();
+  vector<string> options;
   if (dictionary.Follow(s.c_str(), s.length(), &index)) {
     completer.Start(index);
     while (completer.Next()) {
-      cout << ' ' << s << completer.key() << " = " << completer.value();
+      options.push_back(completer.key());
     }
   }
-  cout << endl;
+  return options;
 }
 }
 
@@ -94,7 +95,6 @@ Scrabble::Scrabble(const char* board)
 Scrabble::~Scrabble() { free(board_); }
 
 void Scrabble::FindBestMove(const std::vector<char>& tablet) {
-  CompleteKeys(*dictionary_, *guide_, "nua");
   vector<pair<int, int>> anchors = FindAnchors();
   for (const auto& anchor : anchors) {
     for (char c : tablet) {
@@ -102,13 +102,56 @@ void Scrabble::FindBestMove(const std::vector<char>& tablet) {
       if (valid) {
         cout << "Valid placement: " << c << " at: " << anchor.first << ","
              << anchor.second << endl;
-        // Explore this anchor start.
-        std::vector<char> remaining_tiles(tablet);
-        remaining_tiles.erase(
-            find(remaining_tiles.begin(), remaining_tiles.end(), c));
+      }
+
+      // Explore this anchor start.
+      std::vector<char> remaining_tiles(tablet);
+      remaining_tiles.erase(
+          find(remaining_tiles.begin(), remaining_tiles.end(), c));
+
+      ExpandLeft(string(1, c), anchor, remaining_tiles);
+    }
+  }
+}
+
+void Scrabble::ExpandLeft(string s, pair<int, int> pos,
+                          const vector<char>& tiles) const {
+  pair<int, int> left_pos = make_pair(pos.first - 1, pos.second);
+  if (left_pos.first < 0 || HasPlacedTile(left_pos.first, left_pos.second)) {
+    return;
+  }
+
+  string left = GetLeftConnectingCharacters(left_pos);
+
+  for (char tile : tiles) {
+    string new_word = left + tile + s + GetRightConnectingCharacters(make_pair(
+                                            pos.first + s.size(), pos.second));
+    vector<string> options = CompleteKeys(*dictionary_, *guide_, new_word);
+    if (!options.empty() && CrossCheck(new_word, left_pos)) {
+      cout << new_word << " valid at: " << left_pos.first << ","
+           << left_pos.second << endl;
+
+      std::vector<char> remaining_tiles(tiles);
+      remaining_tiles.erase(
+          find(remaining_tiles.begin(), remaining_tiles.end(), tile));
+      if (!remaining_tiles.empty()) {
+        ExpandLeft(new_word, left_pos, remaining_tiles);
       }
     }
   }
+}
+
+bool Scrabble::CrossCheck(string s, pair<int, int> start_pos) const {
+  for (int x = start_pos.first; x < start_pos.first + s.size(); ++x) {
+    pair<int, int> current = make_pair(x, start_pos.second);
+    string down_word = GetUpConnectingCharacters(current) +
+                       s[x - start_pos.first] +
+                       GetDownConnectingCharacters(current);
+    if (down_word.size() > 1 && !dictionary_->Contains(down_word.c_str())) {
+      return false;
+    }
+  }
+  return true;
 }
 
 bool Scrabble::IsValidPlacement(char c, pair<int, int> pos) const {
