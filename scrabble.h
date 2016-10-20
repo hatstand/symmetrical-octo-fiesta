@@ -30,6 +30,8 @@ class Scrabble {
   bool IsValidPlacement(char c, std::pair<int, int> pos) const;
   std::string GetLeftConnectingCharacters(std::pair<int, int> pos) const;
   std::string GetRightConnectingCharacters(std::pair<int, int> pos) const;
+  std::string GetUpConnectingCharacters(std::pair<int, int> pos) const;
+  std::string GetDownConnectingCharacters(std::pair<int, int> pos) const;
 
   static const int kGridSize = 15;
   char* board_;

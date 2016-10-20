@@ -98,9 +98,15 @@ void Scrabble::FindBestMove(const std::vector<char>& tablet) {
   vector<pair<int, int>> anchors = FindAnchors();
   for (const auto& anchor : anchors) {
     for (char c : tablet) {
-      cout << "Trying: " << c << " at: " << anchor.first << "," << anchor.second
-           << endl;
-      cout << IsValidPlacement(c, anchor) << endl;
+      bool valid = IsValidPlacement(c, anchor);
+      if (valid) {
+        cout << "Valid placement: " << c << " at: " << anchor.first << ","
+             << anchor.second << endl;
+        // Explore this anchor start.
+        std::vector<char> remaining_tiles(tablet);
+        remaining_tiles.erase(
+            find(remaining_tiles.begin(), remaining_tiles.end(), c));
+      }
     }
   }
 }
@@ -110,9 +116,14 @@ bool Scrabble::IsValidPlacement(char c, pair<int, int> pos) const {
   string right = GetRightConnectingCharacters(pos);
 
   string word = left + c + right;
-  cout << word << endl;
 
-  return dictionary_->Contains(word.c_str());
+  string up = GetUpConnectingCharacters(pos);
+  string down = GetDownConnectingCharacters(pos);
+
+  string down_word = up + c + down;
+
+  return dictionary_->Contains(word.c_str()) &&
+         dictionary_->Contains(down_word.c_str());
 }
 
 namespace {
@@ -140,6 +151,36 @@ string Scrabble::GetRightConnectingCharacters(pair<int, int> pos) const {
   int y = pos.second;
   for (int i = x; i < kGridSize; ++i) {
     char c = board_[i + y * kGridSize];
+    if (IsRealCharacter(c)) {
+      ret.push_back(c);
+    } else {
+      return ret;
+    }
+  }
+  return ret;
+}
+
+string Scrabble::GetUpConnectingCharacters(pair<int, int> pos) const {
+  string ret;
+  int x = pos.first;
+  int y = pos.second - 1;
+  for (int i = y; i >= 0; ++i) {
+    char c = board_[x + i * kGridSize];
+    if (IsRealCharacter(c)) {
+      ret.insert(ret.begin(), c);
+    } else {
+      return ret;
+    }
+  }
+  return ret;
+}
+
+string Scrabble::GetDownConnectingCharacters(pair<int, int> pos) const {
+  string ret;
+  int x = pos.first;
+  int y = pos.second + 1;
+  for (int i = y; i < kGridSize; ++i) {
+    char c = board_[x + i * kGridSize];
     if (IsRealCharacter(c)) {
       ret.push_back(c);
     } else {
