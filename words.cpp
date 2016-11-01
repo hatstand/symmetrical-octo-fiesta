@@ -17,6 +17,7 @@ enum SpecialSquare {
   DL = 1,
   TW = 2,
   DW = 3,
+  BLANK = 4,  // Blank tile in rack.
 };
 
 void ShowImage(const cv::Mat& image) {
