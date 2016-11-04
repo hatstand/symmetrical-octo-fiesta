@@ -35,6 +35,7 @@ class Scrabble {
   void ExpandLeft(std::string s, std::pair<int, int> pos,
                   const std::vector<char>& tiles) const;
   bool CrossCheck(std::string s, std::pair<int, int> pos) const;
+  char get(int x, int y) const;
 
   static const int kGridSize = 15;
   char* board_;

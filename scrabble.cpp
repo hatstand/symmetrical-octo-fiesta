@@ -178,7 +178,7 @@ string Scrabble::GetLeftConnectingCharacters(pair<int, int> pos) const {
   int x = pos.first - 1;
   int y = pos.second;
   for (int i = x; i >= 0; --i) {
-    char c = board_[i + y * kGridSize];
+    char c = get(i, y);
     if (IsRealCharacter(c)) {
       ret.insert(ret.begin(), c);
     } else {
@@ -193,7 +193,7 @@ string Scrabble::GetRightConnectingCharacters(pair<int, int> pos) const {
   int x = pos.first + 1;
   int y = pos.second;
   for (int i = x; i < kGridSize; ++i) {
-    char c = board_[i + y * kGridSize];
+    char c = get(i, y);
     if (IsRealCharacter(c)) {
       ret.push_back(c);
     } else {
@@ -208,7 +208,7 @@ string Scrabble::GetUpConnectingCharacters(pair<int, int> pos) const {
   int x = pos.first;
   int y = pos.second - 1;
   for (int i = y; i >= 0; ++i) {
-    char c = board_[x + i * kGridSize];
+    char c = get(x, i);
     if (IsRealCharacter(c)) {
       ret.insert(ret.begin(), c);
     } else {
@@ -223,7 +223,7 @@ string Scrabble::GetDownConnectingCharacters(pair<int, int> pos) const {
   int x = pos.first;
   int y = pos.second + 1;
   for (int i = y; i < kGridSize; ++i) {
-    char c = board_[x + i * kGridSize];
+    char c = get(x, i);
     if (IsRealCharacter(c)) {
       ret.push_back(c);
     } else {
@@ -260,7 +260,7 @@ bool Scrabble::HasPlacedTile(int i, int j) const {
   if (i < 0 || j < 0 || i >= kGridSize || j >= kGridSize) {
     return false;
   }
-  return HasPlacedTile(board_[i + j * kGridSize]);
+  return HasPlacedTile(get(i, j));
 }
 
 bool Scrabble::HasPlacedTile(char tile) const {
@@ -270,8 +270,15 @@ bool Scrabble::HasPlacedTile(char tile) const {
 void Scrabble::PrintBoard() const {
   for (int i = 0; i < kGridSize; ++i) {
     for (int j = 0; j < kGridSize; ++j) {
-      cout << board_[i * kGridSize + j];
+      cout << get(i, j);
     }
     cout << endl;
   }
+}
+
+char Scrabble::get(int x, int y) const {
+  if (x < 0 || x >= kGridSize || y < 0 || y > kGridSize) {
+    return '\0';
+   }
+  return board_[x + y * kGridSize];
 }
