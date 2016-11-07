@@ -12,14 +12,6 @@
 static const int kGridSize = 15;
 static const int kTabletSize = 7;
 
-enum SpecialSquare {
-  TL = 0,
-  DL = 1,
-  TW = 2,
-  DW = 3,
-  BLANK = 4,  // Blank tile in rack.
-};
-
 void ShowImage(const cv::Mat& image) {
   cv::imshow("foo", image);
   cv::waitKey(0);

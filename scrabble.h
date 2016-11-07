@@ -7,6 +7,14 @@
 #include <memory>
 #include <vector>
 
+enum SpecialSquare {
+  TL = 0,
+  DL = 1,
+  TW = 2,
+  DW = 3,
+  BLANK = 4,  // Blank tile in rack.
+};
+
 namespace dawgdic {
 class Dawg;
 class Dictionary;
@@ -23,6 +31,33 @@ class Scrabble {
   void PrintBoard() const;
 
  private:
+  class Solution {
+   public:
+    Solution(int x, int y, const std::string& word);
+    Solution(std::pair<int, int> pos, const std::string& word);
+
+    int x() const { return x_; }
+    int y() const { return y_; }
+
+    const std::string& word() const { return word_; }
+
+   private:
+    int x_;
+    int y_;
+    std::string word_;
+  };
+
+  class Rack {
+   public:
+    explicit Rack(const std::vector<char>& rack);
+
+    bool Contains(char c) const;
+    bool Take(char c);
+
+   private:
+    std::vector<char> rack_;
+  };
+
   bool HasNeighbours(int i, int j) const;
   bool HasPlacedTile(int i, int j) const;
   bool HasPlacedTile(char c) const;
@@ -36,6 +71,9 @@ class Scrabble {
                   const std::vector<char>& tiles) const;
   bool CrossCheck(std::string s, std::pair<int, int> pos) const;
   char get(int x, int y) const;
+
+  void TryPosition(std::pair<int, int> position, const std::vector<char>& rack) const;
+  bool TryPosition(const Solution& solution, const std::vector<char>& rack) const;
 
   static const int kGridSize = 15;
   char* board_;

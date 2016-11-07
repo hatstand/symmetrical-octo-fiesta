@@ -18,6 +18,8 @@ using std::pair;
 using std::vector;
 using std::make_pair;
 using std::string;
+using std::find_if;
+using std::find;
 
 namespace {
 
@@ -97,21 +99,100 @@ Scrabble::~Scrabble() { free(board_); }
 void Scrabble::FindBestMove(const std::vector<char>& tablet) {
   vector<pair<int, int>> anchors = FindAnchors();
   for (const auto& anchor : anchors) {
-    for (char c : tablet) {
-      bool valid = IsValidPlacement(c, anchor);
-      if (valid) {
-        cout << "Valid placement: " << c << " at: " << anchor.first << ","
-             << anchor.second << endl;
+    TryPosition(anchor, tablet);
+  }
+}
+
+void Scrabble::TryPosition(pair<int, int> position, const vector<char>& rack) const {
+  for (char c : rack) {
+    if (!CrossCheck(string(c, 1), position)) {
+      continue;
+    }
+
+    string left = GetLeftConnectingCharacters(position);
+    string current = left + c + GetRightConnectingCharacters(position);
+    Solution solution(position.first - left.size(), position.second, current);
+    if (TryPosition(solution, rack)) {
+      cout << "Solution: " << current << " at: " << solution.x() << ", " << solution.y() << endl;
+
+      vector<string> options = CompleteKeys(*dictionary_, *guide_, current);
+      for (const string& s : options) {
+        if (s.empty()) {
+          continue;
+        }
+        Solution sol(position.first - left.size(), position.second, current + s);
+        if (TryPosition(sol, rack)) {
+          cout << "Solution: " << sol.word() << " at: " << sol.x() << ", " << sol.y() << endl;
+        }
       }
-
-      // Explore this anchor start.
-      std::vector<char> remaining_tiles(tablet);
-      remaining_tiles.erase(
-          find(remaining_tiles.begin(), remaining_tiles.end(), c));
-
-      ExpandLeft(string(1, c), anchor, remaining_tiles);
     }
   }
+}
+
+Scrabble::Solution::Solution(int x, int y, const string& word)
+    : x_(x), y_(y), word_(word) {}
+
+Scrabble::Solution::Solution(pair<int, int> pos, const string& word)
+    : Scrabble::Solution::Solution(pos.first, pos.second, word) {}
+
+Scrabble::Rack::Rack(const vector<char>& rack)
+    : rack_(rack) {}
+
+bool Scrabble::Rack::Contains(char c) const {
+  auto it = find_if(rack_.begin(), rack_.end(), [c](char d) {
+    return d == c || d == BLANK;
+  });
+  return it != rack_.end();
+}
+
+bool Scrabble::Rack::Take(char c) {
+  // Try to find an actual character first.
+  auto it = find(rack_.begin(), rack_.end(), c);
+  if (it != rack_.end()) {
+    rack_.erase(it);
+    return true;
+  }
+  auto blank = find(rack_.begin(), rack_.end(), BLANK);
+  if (blank != rack_.end()) {
+    rack_.erase(blank);
+    return true;
+  }
+  return false;
+}
+
+bool Scrabble::TryPosition(const Solution& solution, const vector<char>& r) const {
+  if (!CrossCheck(solution.word(), make_pair(solution.x(), solution.y()))) {
+    return false;
+  }
+
+  if (!dictionary_->Contains(solution.word().c_str())) {
+    return false;
+  }
+
+  Rack rack(r);
+
+  for (int i = 0; i < solution.word().size(); ++i) {
+    char c = solution.word()[i];
+    int x = solution.x() + i;
+    int y = solution.y();
+    // Tile already placed, great!
+    if (get(x, y) == c) {
+      continue;
+    }
+    // We've gone off the edge of the board :-(
+    if (get(x, y) == '\0') {
+      return false;
+    }
+    // Use a tile from the rack if it's available.
+    if (solution.word() == "tiger") {
+      cout << "Trying to take: " << c << endl;
+      cout << "Contains: " << rack.Contains(c) << endl;
+    }
+    if (!rack.Take(c)) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void Scrabble::ExpandLeft(string s, pair<int, int> pos,
@@ -268,8 +349,8 @@ bool Scrabble::HasPlacedTile(char tile) const {
 }
 
 void Scrabble::PrintBoard() const {
-  for (int i = 0; i < kGridSize; ++i) {
-    for (int j = 0; j < kGridSize; ++j) {
+  for (int j = 0; j < kGridSize; ++j) {
+    for (int i = 0; i < kGridSize; ++i) {
       cout << get(i, j);
     }
     cout << endl;
