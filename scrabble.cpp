@@ -274,6 +274,7 @@ int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
     char board = get(solution.x() + i, solution.y());
     if (!IsRealCharacter(board)) {
       // Blanks score nothing.
+      // TODO: Optimize blank usage.
       bool blank = rack.UsesBlank(solution.word()[i]);
       rack.Take(solution.word()[i]);
       if (blank) {
