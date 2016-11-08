@@ -24,6 +24,7 @@ using std::map;
 using std::max_element;
 using std::pair;
 using std::string;
+using std::transform;
 using std::vector;
 
 namespace {
@@ -138,8 +139,10 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
   empty_tiles = FindEmptyTiles();
   for (const auto& tile : empty_tiles) {
     vector<Solution> column_solutions = TryPosition(tile, rack);
-    copy(column_solutions.begin(), column_solutions.end(),
-         std::back_inserter(solutions));
+    transform(column_solutions.begin(), column_solutions.end(),
+              std::back_inserter(solutions), [](const Solution& a) {
+                return Solution(a.y(), a.x(), a.word());
+              });
   }
 
   auto best_solution = max_element(
@@ -313,11 +316,12 @@ bool Scrabble::CrossCheck(const Solution& solution) const {
   return CrossCheck(solution.word(), make_pair(solution.x(), solution.y()));
 }
 
-bool Scrabble::CrossCheck(string s, pair<int, int> start_pos) const {
-  for (int x = start_pos.first; x < start_pos.first + s.size(); ++x) {
-    pair<int, int> current = make_pair(x, start_pos.second);
-    string down_word = GetUpConnectingCharacters(current) +
-                       s[x - start_pos.first] +
+bool Scrabble::CrossCheck(const string& s, pair<int, int> start_pos) const {
+  int x = start_pos.first;
+  int y = start_pos.second;
+  for (int i = 0; i < s.size(); ++i) {
+    pair<int, int> current = make_pair(x + i, y);
+    string down_word = GetUpConnectingCharacters(current) + s[i] +
                        GetDownConnectingCharacters(current);
     if (down_word.size() > 1 && !dictionary_->Contains(down_word.c_str())) {
       return false;
@@ -375,7 +379,7 @@ string Scrabble::GetUpConnectingCharacters(pair<int, int> pos) const {
   string ret;
   int x = pos.first;
   int y = pos.second - 1;
-  for (int i = y; i >= 0; ++i) {
+  for (int i = y; i >= 0; --i) {
     char c = get(x, i);
     if (IsRealCharacter(c)) {
       ret.insert(ret.begin(), c);

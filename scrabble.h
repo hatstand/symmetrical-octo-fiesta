@@ -71,7 +71,7 @@ class Scrabble {
   std::string GetDownConnectingCharacters(std::pair<int, int> pos) const;
   void ExpandLeft(std::string s, std::pair<int, int> pos,
                   const std::vector<char>& tiles) const;
-  bool CrossCheck(std::string s, std::pair<int, int> pos) const;
+  bool CrossCheck(const std::string& s, std::pair<int, int> pos) const;
   bool CrossCheck(const Solution& solution) const;
   char get(int x, int y) const;
 
