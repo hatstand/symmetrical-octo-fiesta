@@ -44,7 +44,7 @@ int GetNext(const std::string& path) {
   return next + 1;
 }
 
-void Train(const cv::Mat& image) {
+char Train(const cv::Mat& image) {
   cv::imshow("foo", image);
   char key = static_cast<char>(cv::waitKey(0));
 
@@ -60,6 +60,7 @@ void Train(const cv::Mat& image) {
                        ".png");
 
   imwrite(filename, image);
+  return key;
 }
 
 void TrainDirectory(const std::string path, const std::string name,
@@ -108,7 +109,7 @@ char Recognise(KNearest* nearest, const cv::Mat& image) {
   char recognised = nearest->Recognise(image);
   if (recognised == '?') {
     // Didn't manage this one. Ask a human.
-    Train(image);
+    return Train(image);
   }
   return recognised;
 }
