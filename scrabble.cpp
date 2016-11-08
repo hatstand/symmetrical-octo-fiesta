@@ -1,6 +1,7 @@
 #include "scrabble.h"
 
 #include <algorithm>
+#include <cassert>
 #include <fstream>
 #include <iostream>
 #include <map>
@@ -95,21 +96,41 @@ vector<string> CompleteKeys(const dawgdic::Dictionary& dictionary,
 }
 
 bool IsRealCharacter(char c) { return c >= 'a' && c <= 'z'; }
+
+static const int kGridSize = 15;
+
+vector<char> Transpose(const vector<char> board) {
+  vector<char> transposed(kGridSize * kGridSize);
+  for (int x = 0; x < kGridSize; ++x) {
+    for (int y = 0; y < kGridSize; ++y) {
+      transposed[x + y * kGridSize] = board[y + x * kGridSize];
+    }
+  }
+  assert(transposed.size() == kGridSize * kGridSize);
+  return transposed;
+}
 }
 
 Scrabble::Scrabble(const char* board)
-    : board_(static_cast<char*>(malloc(kGridSize * kGridSize))),
+    : board_(board, board + kGridSize * kGridSize),
       dawg_(BuildDawg()),
       dictionary_(BuildDictionary(*dawg_)),
-      guide_(BuildGuide(*dawg_, *dictionary_)) {
-  memcpy(board_, board, kGridSize * kGridSize);
-}
+      guide_(BuildGuide(*dawg_, *dictionary_)) {}
 
-Scrabble::~Scrabble() { free(board_); }
+Scrabble::~Scrabble() {  // free(board_);
+}
 
 void Scrabble::FindBestMove(const std::vector<char>& rack) {
   // vector<pair<int, int>> anchors = FindAnchors();
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();
+  for (const auto& tile : empty_tiles) {
+    TryPosition(tile, rack);
+  }
+
+  cout << "Trying transposed" << endl;
+  vector<char> transposed = Transpose(board_);
+  board_ = transposed;
+  empty_tiles = FindEmptyTiles();
   for (const auto& tile : empty_tiles) {
     TryPosition(tile, rack);
   }
