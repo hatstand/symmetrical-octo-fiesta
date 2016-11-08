@@ -268,16 +268,16 @@ int Scrabble::Score(const Solution& solution) const {
     char board = get(solution.x() + i, solution.y());
     int multiplier = 1;
     switch (board) {
-      case TL:
+      case '0':
         multiplier = 3;
         break;
-      case DL:
+      case '1':
         multiplier = 2;
         break;
-      case DW:
+      case '3':
         word_multiplier = 2;
         break;
-      case TW:
+      case '2':
         word_multiplier = 3;
         break;
       default:
