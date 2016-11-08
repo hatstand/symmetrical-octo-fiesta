@@ -93,6 +93,8 @@ vector<string> CompleteKeys(const dawgdic::Dictionary& dictionary,
   }
   return options;
 }
+
+bool IsRealCharacter(char c) { return c >= 'a' && c <= 'z'; }
 }
 
 Scrabble::Scrabble(const char* board)
@@ -105,10 +107,11 @@ Scrabble::Scrabble(const char* board)
 
 Scrabble::~Scrabble() { free(board_); }
 
-void Scrabble::FindBestMove(const std::vector<char>& tablet) {
-  vector<pair<int, int>> anchors = FindAnchors();
-  for (const auto& anchor : anchors) {
-    TryPosition(anchor, tablet);
+void Scrabble::FindBestMove(const std::vector<char>& rack) {
+  // vector<pair<int, int>> anchors = FindAnchors();
+  vector<pair<int, int>> empty_tiles = FindEmptyTiles();
+  for (const auto& tile : empty_tiles) {
+    TryPosition(tile, rack);
   }
 }
 
@@ -183,6 +186,7 @@ bool Scrabble::TryPosition(const Solution& solution,
 
   Rack rack(r);
 
+  bool has_anchor = false;
   for (int i = 0; i < solution.word().size(); ++i) {
     char c = solution.word()[i];
     int x = solution.x() + i;
@@ -198,8 +202,11 @@ bool Scrabble::TryPosition(const Solution& solution,
     if (!rack.Take(c)) {
       return false;
     }
+    if (IsAnchor(x, y)) {
+      has_anchor = true;
+    }
   }
-  return true;
+  return has_anchor;
 }
 
 // Assumes valid solution.
@@ -290,10 +297,6 @@ bool Scrabble::IsValidPlacement(char c, pair<int, int> pos) const {
          dictionary_->Contains(down_word.c_str());
 }
 
-namespace {
-bool IsRealCharacter(char c) { return c >= 'a' && c <= 'z'; }
-}
-
 string Scrabble::GetLeftConnectingCharacters(pair<int, int> pos) const {
   std::string ret;
   int x = pos.first - 1;
@@ -359,17 +362,28 @@ vector<pair<int, int>> Scrabble::FindAnchors() const {
   vector<pair<int, int>> anchors;
   for (int i = 0; i < kGridSize; ++i) {
     for (int j = 0; j < kGridSize; ++j) {
-      // Cannot start a word if there already is a tile there.
-      if (HasPlacedTile(i, j)) {
-        continue;
+      if (IsAnchor(i, j)) {
+        anchors.push_back(make_pair(i, j));
       }
-      if (!HasNeighbours(i, j)) {
-        continue;
-      }
-      anchors.push_back(make_pair(i, j));
     }
   }
   return anchors;
+}
+
+bool Scrabble::IsAnchor(int x, int y) const {
+  return !HasPlacedTile(x, y) && HasNeighbours(x, y);
+}
+
+vector<pair<int, int>> Scrabble::FindEmptyTiles() const {
+  vector<pair<int, int>> empty_tiles;
+  for (int i = 0; i < kGridSize; ++i) {
+    for (int j = 0; j < kGridSize; ++j) {
+      if (!HasPlacedTile(i, j)) {
+        empty_tiles.push_back(make_pair(i, j));
+      }
+    }
+  }
+  return empty_tiles;
 }
 
 bool Scrabble::HasNeighbours(int i, int j) const {
