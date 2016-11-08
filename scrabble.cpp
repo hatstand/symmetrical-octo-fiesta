@@ -165,6 +165,7 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
 vector<Scrabble::Solution> Scrabble::TryPosition(
     pair<int, int> position, const vector<char>& rack) const {
   vector<Solution> solutions;
+  // TODO: Start words with a blank.
   // Try starting a word here with each tile in the rack.
   for (char c : rack) {
     // Construct the actual word generated which includes tiles to the left &
