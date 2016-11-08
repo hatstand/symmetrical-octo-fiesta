@@ -103,7 +103,8 @@ void Scrabble::FindBestMove(const std::vector<char>& tablet) {
   }
 }
 
-void Scrabble::TryPosition(pair<int, int> position, const vector<char>& rack) const {
+void Scrabble::TryPosition(pair<int, int> position,
+                           const vector<char>& rack) const {
   for (char c : rack) {
     if (!CrossCheck(string(c, 1), position)) {
       continue;
@@ -113,16 +114,19 @@ void Scrabble::TryPosition(pair<int, int> position, const vector<char>& rack) co
     string current = left + c + GetRightConnectingCharacters(position);
     Solution solution(position.first - left.size(), position.second, current);
     if (TryPosition(solution, rack)) {
-      cout << "Solution: " << current << " at: " << solution.x() << ", " << solution.y() << endl;
+      cout << "Solution: " << current << " at: " << solution.x() << ", "
+           << solution.y() << endl;
 
       vector<string> options = CompleteKeys(*dictionary_, *guide_, current);
       for (const string& s : options) {
         if (s.empty()) {
           continue;
         }
-        Solution sol(position.first - left.size(), position.second, current + s);
+        Solution sol(position.first - left.size(), position.second,
+                     current + s);
         if (TryPosition(sol, rack)) {
-          cout << "Solution: " << sol.word() << " at: " << sol.x() << ", " << sol.y() << endl;
+          cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
+               << sol.y() << endl;
         }
       }
     }
@@ -135,13 +139,11 @@ Scrabble::Solution::Solution(int x, int y, const string& word)
 Scrabble::Solution::Solution(pair<int, int> pos, const string& word)
     : Scrabble::Solution::Solution(pos.first, pos.second, word) {}
 
-Scrabble::Rack::Rack(const vector<char>& rack)
-    : rack_(rack) {}
+Scrabble::Rack::Rack(const vector<char>& rack) : rack_(rack) {}
 
 bool Scrabble::Rack::Contains(char c) const {
-  auto it = find_if(rack_.begin(), rack_.end(), [c](char d) {
-    return d == c || d == BLANK;
-  });
+  auto it = find_if(rack_.begin(), rack_.end(),
+                    [c](char d) { return d == c || d == '4'; });
   return it != rack_.end();
 }
 
@@ -152,7 +154,7 @@ bool Scrabble::Rack::Take(char c) {
     rack_.erase(it);
     return true;
   }
-  auto blank = find(rack_.begin(), rack_.end(), BLANK);
+  auto blank = find(rack_.begin(), rack_.end(), '4');
   if (blank != rack_.end()) {
     rack_.erase(blank);
     return true;
@@ -160,7 +162,8 @@ bool Scrabble::Rack::Take(char c) {
   return false;
 }
 
-bool Scrabble::TryPosition(const Solution& solution, const vector<char>& r) const {
+bool Scrabble::TryPosition(const Solution& solution,
+                           const vector<char>& r) const {
   if (!CrossCheck(solution.word(), make_pair(solution.x(), solution.y()))) {
     return false;
   }
@@ -360,6 +363,6 @@ void Scrabble::PrintBoard() const {
 char Scrabble::get(int x, int y) const {
   if (x < 0 || x >= kGridSize || y < 0 || y > kGridSize) {
     return '\0';
-   }
+  }
   return board_[x + y * kGridSize];
 }
