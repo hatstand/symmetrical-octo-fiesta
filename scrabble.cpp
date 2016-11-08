@@ -169,8 +169,10 @@ vector<Scrabble::Solution> Scrabble::TryPosition(
       int x = position.first - left.size();
       int y = position.second;
 
-      string word = current + s + GetRightConnectingCharacters(make_pair(
-                                      x + current.size() + s.size(), y));
+      string word = current + s;
+      int end_x = x + word.size();
+      word += GetRightConnectingCharacters(make_pair(end_x - 1, y));
+
       Solution sol(position.first - left.size(), position.second, word);
       if (TryPosition(sol, rack)) {
         cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
@@ -228,12 +230,17 @@ bool Scrabble::TryPosition(const Solution& solution,
     char c = solution.word()[i];
     int x = solution.x() + i;
     int y = solution.y();
+
     // Tile already placed, great!
     if (get(x, y) == c) {
       continue;
     }
     // We've gone off the edge of the board :-(
     if (get(x, y) == '\0') {
+      return false;
+    }
+    // A real character that isn't what we want.
+    if (IsRealCharacter(get(x, y))) {
       return false;
     }
     if (!rack.Take(c)) {
