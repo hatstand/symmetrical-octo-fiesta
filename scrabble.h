@@ -70,10 +70,14 @@ class Scrabble {
   void ExpandLeft(std::string s, std::pair<int, int> pos,
                   const std::vector<char>& tiles) const;
   bool CrossCheck(std::string s, std::pair<int, int> pos) const;
+  bool CrossCheck(const Solution& solution) const;
   char get(int x, int y) const;
 
-  void TryPosition(std::pair<int, int> position, const std::vector<char>& rack) const;
-  bool TryPosition(const Solution& solution, const std::vector<char>& rack) const;
+  void TryPosition(std::pair<int, int> position,
+                   const std::vector<char>& rack) const;
+  bool TryPosition(const Solution& solution,
+                   const std::vector<char>& rack) const;
+  int Score(const Solution& solution) const;
 
   static const int kGridSize = 15;
   char* board_;

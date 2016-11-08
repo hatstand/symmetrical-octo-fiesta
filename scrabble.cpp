@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <fstream>
 #include <iostream>
+#include <map>
 
 #include <dawgdic/completer.h>
 #include <dawgdic/dawg-builder.h>
@@ -20,8 +21,16 @@ using std::make_pair;
 using std::string;
 using std::find_if;
 using std::find;
+using std::map;
 
 namespace {
+
+static map<char, int> kScoreMap = {
+    {'a', 1}, {'b', 4}, {'c', 4},  {'d', 2}, {'e', 1},  {'f', 4}, {'g', 3},
+    {'h', 3}, {'i', 1}, {'j', 10}, {'k', 5}, {'l', 2},  {'m', 4}, {'n', 2},
+    {'o', 1}, {'p', 4}, {'q', 10}, {'r', 1}, {'s', 1},  {'t', 1}, {'u', 2},
+    {'v', 5}, {'w', 4}, {'x', 8},  {'y', 3}, {'z', 10},
+};
 
 dawgdic::Dawg* BuildDawg() {
   dawgdic::DawgBuilder builder;
@@ -115,7 +124,7 @@ void Scrabble::TryPosition(pair<int, int> position,
     Solution solution(position.first - left.size(), position.second, current);
     if (TryPosition(solution, rack)) {
       cout << "Solution: " << current << " at: " << solution.x() << ", "
-           << solution.y() << endl;
+           << solution.y() << " -> " << Score(solution) << endl;
 
       vector<string> options = CompleteKeys(*dictionary_, *guide_, current);
       for (const string& s : options) {
@@ -126,7 +135,7 @@ void Scrabble::TryPosition(pair<int, int> position,
                      current + s);
         if (TryPosition(sol, rack)) {
           cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
-               << sol.y() << endl;
+               << sol.y() << " -> " << Score(sol) << endl;
         }
       }
     }
@@ -164,7 +173,7 @@ bool Scrabble::Rack::Take(char c) {
 
 bool Scrabble::TryPosition(const Solution& solution,
                            const vector<char>& r) const {
-  if (!CrossCheck(solution.word(), make_pair(solution.x(), solution.y()))) {
+  if (!CrossCheck(solution)) {
     return false;
   }
 
@@ -198,6 +207,35 @@ bool Scrabble::TryPosition(const Solution& solution,
   return true;
 }
 
+// Assumes valid solution.
+// TODO: Score blanks correctly.
+int Scrabble::Score(const Solution& solution) const {
+  int score = 0;
+  int word_multiplier = 1;
+  for (int i = 0; i < solution.word().size(); ++i) {
+    char board = get(solution.x() + i, solution.y());
+    int multiplier = 1;
+    switch (board) {
+      case TL:
+        multiplier = 3;
+        break;
+      case DL:
+        multiplier = 2;
+        break;
+      case DW:
+        word_multiplier = 2;
+        break;
+      case TW:
+        word_multiplier = 3;
+        break;
+      default:
+        break;
+    }
+    score += kScoreMap[solution.word()[i]] * multiplier;
+  }
+  return score * word_multiplier;
+}
+
 void Scrabble::ExpandLeft(string s, pair<int, int> pos,
                           const vector<char>& tiles) const {
   pair<int, int> left_pos = make_pair(pos.first - 1, pos.second);
@@ -223,6 +261,10 @@ void Scrabble::ExpandLeft(string s, pair<int, int> pos,
       }
     }
   }
+}
+
+bool Scrabble::CrossCheck(const Solution& solution) const {
+  return CrossCheck(solution.word(), make_pair(solution.x(), solution.y()));
 }
 
 bool Scrabble::CrossCheck(string s, pair<int, int> start_pos) const {
