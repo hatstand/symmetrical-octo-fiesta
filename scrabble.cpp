@@ -124,37 +124,42 @@ Scrabble::~Scrabble() {  // free(board_);
 }
 
 void Scrabble::FindBestMove(const std::vector<char>& rack) {
-  // vector<pair<int, int>> anchors = FindAnchors();
-  vector<Solution> solutions;
+  vector<Solution> row_solutions;
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();
   for (const auto& tile : empty_tiles) {
-    vector<Solution> row_solutions = TryPosition(tile, rack);
-    copy(row_solutions.begin(), row_solutions.end(),
-         std::back_inserter(solutions));
+    vector<Solution> s = TryPosition(tile, rack);
+    copy(s.begin(), s.end(), std::back_inserter(row_solutions));
+  }
+  auto best_row_solution = std::max_element(
+      row_solutions.begin(), row_solutions.end(),
+      [this](const Scrabble::Solution& a, const Scrabble::Solution& b) {
+        return Score(a) < Score(b);
+      });
+
+  if (best_row_solution != row_solutions.end()) {
+    cout << "Best row word is: " << best_row_solution->word()
+         << " at: " << best_row_solution->x() << "," << best_row_solution->y()
+         << " with a score of: " << Score(*best_row_solution) << endl;
   }
 
   cout << "Trying transposed" << endl;
   vector<char> transposed = Transpose(board_);
   board_ = transposed;
   empty_tiles = FindEmptyTiles();
+  vector<Solution> column_solutions;
   for (const auto& tile : empty_tiles) {
-    vector<Solution> column_solutions = TryPosition(tile, rack);
-    transform(column_solutions.begin(), column_solutions.end(),
-              std::back_inserter(solutions), [](const Solution& a) {
-                return Solution(a.y(), a.x(), a.word());
-              });
+    vector<Solution> s = TryPosition(tile, rack);
+    copy(s.begin(), s.end(), std::back_inserter(column_solutions));
   }
-
-  auto best_solution = max_element(
-      solutions.begin(), solutions.end(),
+  auto best_column_solution = std::max_element(
+      column_solutions.begin(), column_solutions.end(),
       [this](const Scrabble::Solution& a, const Scrabble::Solution& b) {
         return Score(a) < Score(b);
       });
-  if (best_solution != solutions.end()) {
-    cout << "Best word is: " << best_solution->word()
-         << " at: " << best_solution->x() << "," << best_solution->y()
-         << " with a score of: " << Score(*best_solution) << endl;
-  }
+  cout << "Best column word is: " << best_column_solution->word()
+       << " at: " << best_column_solution->x() << ","
+       << best_column_solution->y()
+       << " with a score of: " << Score(*best_column_solution) << endl;
 }
 
 vector<Scrabble::Solution> Scrabble::TryPosition(
@@ -178,8 +183,6 @@ vector<Scrabble::Solution> Scrabble::TryPosition(
 
       Solution sol(position.first - left.size(), position.second, word);
       if (TryPosition(sol, rack)) {
-        cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
-             << sol.y() << " -> " << Score(sol) << endl;
         solutions.push_back(sol);
       }
     }
@@ -278,6 +281,7 @@ int Scrabble::Score(const Solution& solution) const {
         word_multiplier = 3;
         break;
       default:
+        multiplier = 1;
         break;
     }
     score += kScoreMap[solution.word()[i]] * multiplier;
