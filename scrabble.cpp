@@ -132,14 +132,14 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
   }
   auto best_row_solution = std::max_element(
       row_solutions.begin(), row_solutions.end(),
-      [this](const Scrabble::Solution& a, const Scrabble::Solution& b) {
-        return Score(a) < Score(b);
+      [this, rack](const Scrabble::Solution& a, const Scrabble::Solution& b) {
+        return Score(a, rack) < Score(b, rack);
       });
 
   if (best_row_solution != row_solutions.end()) {
     cout << "Best row word is: " << best_row_solution->word()
          << " at: " << best_row_solution->x() << "," << best_row_solution->y()
-         << " with a score of: " << Score(*best_row_solution) << endl;
+         << " with a score of: " << Score(*best_row_solution, rack) << endl;
   }
 
   cout << "Trying transposed" << endl;
@@ -153,13 +153,13 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
   }
   auto best_column_solution = std::max_element(
       column_solutions.begin(), column_solutions.end(),
-      [this](const Scrabble::Solution& a, const Scrabble::Solution& b) {
-        return Score(a) < Score(b);
+      [this, rack](const Scrabble::Solution& a, const Scrabble::Solution& b) {
+        return Score(a, rack) < Score(b, rack);
       });
   cout << "Best column word is: " << best_column_solution->word()
        << " at: " << best_column_solution->x() << ","
        << best_column_solution->y()
-       << " with a score of: " << Score(*best_column_solution) << endl;
+       << " with a score of: " << Score(*best_column_solution, rack) << endl;
 }
 
 vector<Scrabble::Solution> Scrabble::TryPosition(
@@ -219,6 +219,11 @@ bool Scrabble::Rack::Take(char c) {
   return false;
 }
 
+bool Scrabble::Rack::UsesBlank(char c) const {
+  auto it = find(rack_.begin(), rack_.end(), c);
+  return it == rack_.end();
+}
+
 bool Scrabble::TryPosition(const Solution& solution,
                            const vector<char>& r) const {
   if (!CrossCheck(solution)) {
@@ -261,11 +266,20 @@ bool Scrabble::TryPosition(const Solution& solution,
 
 // Assumes valid solution.
 // TODO: Score blanks correctly.
-int Scrabble::Score(const Solution& solution) const {
+int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
+  Rack rack(r);
   int score = 0;
   int word_multiplier = 1;
   for (int i = 0; i < solution.word().size(); ++i) {
     char board = get(solution.x() + i, solution.y());
+    if (!IsRealCharacter(board)) {
+      // Blanks score nothing.
+      bool blank = rack.UsesBlank(solution.word()[i]);
+      rack.Take(solution.word()[i]);
+      if (blank) {
+        continue;
+      }
+    }
     int multiplier = 1;
     switch (board) {
       case '0':

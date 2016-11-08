@@ -53,6 +53,8 @@ class Scrabble {
 
     bool Contains(char c) const;
     bool Take(char c);
+    // Whether using this character would take a blank.
+    bool UsesBlank(char c) const;
 
    private:
     std::vector<char> rack_;
@@ -79,7 +81,7 @@ class Scrabble {
                                     const std::vector<char>& rack) const;
   bool TryPosition(const Solution& solution,
                    const std::vector<char>& rack) const;
-  int Score(const Solution& solution) const;
+  int Score(const Solution& solution, const std::vector<char>& rack) const;
 
   static const int kGridSize = 15;
   std::vector<char> board_;
