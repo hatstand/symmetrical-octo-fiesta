@@ -290,10 +290,10 @@ int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
         multiplier = 2;
         break;
       case '3':
-        word_multiplier = 2;
+        word_multiplier *= 2;
         break;
       case '2':
-        word_multiplier = 3;
+        word_multiplier *= 3;
         break;
       default:
         multiplier = 1;
