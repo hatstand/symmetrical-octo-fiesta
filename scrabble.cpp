@@ -265,7 +265,7 @@ bool Scrabble::TryPosition(const Solution& solution,
 }
 
 // Assumes valid solution.
-// TODO: Score blanks correctly.
+// TODO: Score new cross words as well.
 int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
   Rack rack(r);
   int score = 0;
