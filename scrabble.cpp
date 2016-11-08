@@ -195,11 +195,6 @@ bool Scrabble::TryPosition(const Solution& solution,
     if (get(x, y) == '\0') {
       return false;
     }
-    // Use a tile from the rack if it's available.
-    if (solution.word() == "tiger") {
-      cout << "Trying to take: " << c << endl;
-      cout << "Contains: " << rack.Contains(c) << endl;
-    }
     if (!rack.Take(c)) {
       return false;
     }
