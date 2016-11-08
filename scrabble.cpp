@@ -14,15 +14,17 @@
 #include <dawgdic/guide-builder.h>
 #include <dawgdic/guide.h>
 
+using std::copy;
 using std::cout;
 using std::endl;
-using std::pair;
-using std::vector;
-using std::make_pair;
-using std::string;
-using std::find_if;
 using std::find;
+using std::find_if;
+using std::make_pair;
 using std::map;
+using std::max_element;
+using std::pair;
+using std::string;
+using std::vector;
 
 namespace {
 
@@ -122,9 +124,12 @@ Scrabble::~Scrabble() {  // free(board_);
 
 void Scrabble::FindBestMove(const std::vector<char>& rack) {
   // vector<pair<int, int>> anchors = FindAnchors();
+  vector<Solution> solutions;
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();
   for (const auto& tile : empty_tiles) {
-    TryPosition(tile, rack);
+    vector<Solution> row_solutions = TryPosition(tile, rack);
+    copy(row_solutions.begin(), row_solutions.end(),
+         std::back_inserter(solutions));
   }
 
   cout << "Trying transposed" << endl;
@@ -132,12 +137,26 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
   board_ = transposed;
   empty_tiles = FindEmptyTiles();
   for (const auto& tile : empty_tiles) {
-    TryPosition(tile, rack);
+    vector<Solution> column_solutions = TryPosition(tile, rack);
+    copy(column_solutions.begin(), column_solutions.end(),
+         std::back_inserter(solutions));
+  }
+
+  auto best_solution = max_element(
+      solutions.begin(), solutions.end(),
+      [this](const Scrabble::Solution& a, const Scrabble::Solution& b) {
+        return Score(a) < Score(b);
+      });
+  if (best_solution != solutions.end()) {
+    cout << "Best word is: " << best_solution->word()
+         << " at: " << best_solution->x() << "," << best_solution->y()
+         << " with a score of: " << Score(*best_solution) << endl;
   }
 }
 
-void Scrabble::TryPosition(pair<int, int> position,
-                           const vector<char>& rack) const {
+vector<Scrabble::Solution> Scrabble::TryPosition(
+    pair<int, int> position, const vector<char>& rack) const {
+  vector<Solution> solutions;
   // Try starting a word here with each tile in the rack.
   for (char c : rack) {
     // Construct the actual word generated which includes tiles to the left &
@@ -147,13 +166,20 @@ void Scrabble::TryPosition(pair<int, int> position,
     // Find all available suffixes given this string (empty is a valid suffix).
     vector<string> options = CompleteKeys(*dictionary_, *guide_, current);
     for (const string& s : options) {
-      Solution sol(position.first - left.size(), position.second, current + s);
+      int x = position.first - left.size();
+      int y = position.second;
+
+      string word = current + s + GetRightConnectingCharacters(make_pair(
+                                      x + current.size() + s.size(), y));
+      Solution sol(position.first - left.size(), position.second, word);
       if (TryPosition(sol, rack)) {
         cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
              << sol.y() << " -> " << Score(sol) << endl;
+        solutions.push_back(sol);
       }
     }
   }
+  return solutions;
 }
 
 Scrabble::Solution::Solution(int x, int y, const string& word)

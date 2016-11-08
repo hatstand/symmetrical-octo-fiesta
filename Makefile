@@ -1,5 +1,5 @@
 CXX=g++
-CXXFLAGS=--std=c++0x
+CXXFLAGS=--std=c++0x -g
 LDFLAGS=-lopencv_core -lopencv_highgui -lopencv_imgproc -lopencv_ml
 
 %.o: %.cpp
