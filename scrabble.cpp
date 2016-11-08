@@ -138,29 +138,19 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
 
 void Scrabble::TryPosition(pair<int, int> position,
                            const vector<char>& rack) const {
+  // Try starting a word here with each tile in the rack.
   for (char c : rack) {
-    if (!CrossCheck(string(c, 1), position)) {
-      continue;
-    }
-
+    // Construct the actual word generated which includes tiles to the left &
+    // right.
     string left = GetLeftConnectingCharacters(position);
     string current = left + c + GetRightConnectingCharacters(position);
-    Solution solution(position.first - left.size(), position.second, current);
-    if (TryPosition(solution, rack)) {
-      cout << "Solution: " << current << " at: " << solution.x() << ", "
-           << solution.y() << " -> " << Score(solution) << endl;
-
-      vector<string> options = CompleteKeys(*dictionary_, *guide_, current);
-      for (const string& s : options) {
-        if (s.empty()) {
-          continue;
-        }
-        Solution sol(position.first - left.size(), position.second,
-                     current + s);
-        if (TryPosition(sol, rack)) {
-          cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
-               << sol.y() << " -> " << Score(sol) << endl;
-        }
+    // Find all available suffixes given this string (empty is a valid suffix).
+    vector<string> options = CompleteKeys(*dictionary_, *guide_, current);
+    for (const string& s : options) {
+      Solution sol(position.first - left.size(), position.second, current + s);
+      if (TryPosition(sol, rack)) {
+        cout << "Solution: " << sol.word() << " at: " << sol.x() << ", "
+             << sol.y() << " -> " << Score(sol) << endl;
       }
     }
   }
