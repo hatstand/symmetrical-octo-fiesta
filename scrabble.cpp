@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <cassert>
 #include <fstream>
+#include <future>
 #include <iostream>
 #include <map>
 
@@ -124,12 +125,20 @@ Scrabble::~Scrabble() {  // free(board_);
 }
 
 void Scrabble::FindBestMove(const std::vector<char>& rack) {
-  vector<Solution> row_solutions;
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();
+  vector<std::future<vector<Solution>>> row_futures;
   for (const auto& tile : empty_tiles) {
-    vector<Solution> s = TryPosition(tile, rack);
-    copy(s.begin(), s.end(), std::back_inserter(row_solutions));
+    row_futures.emplace_back(
+        std::async(std::launch::async,
+                   [this, tile, rack]() { return TryPosition(tile, rack); }));
   }
+
+  vector<Solution> row_solutions;
+  for (auto& future : row_futures) {
+    vector<Solution> solutions = future.get();
+    copy(solutions.begin(), solutions.end(), std::back_inserter(row_solutions));
+  }
+
   auto best_row_solution = std::max_element(
       row_solutions.begin(), row_solutions.end(),
       [this, rack](const Scrabble::Solution& a, const Scrabble::Solution& b) {
