@@ -279,9 +279,20 @@ int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
   Rack rack(r);
   int score = 0;
   int word_multiplier = 1;
+  int extra_words_score = 0;
   for (int i = 0; i < solution.word().size(); ++i) {
     char board = get(solution.x() + i, solution.y());
     if (!IsRealCharacter(board)) {
+      // Find and score any down words we've also made.
+      pair<int, int> position = make_pair(solution.x() + i, solution.y());
+      string down_word = GetUpConnectingCharacters(position) +
+                         solution.word()[i] +
+                         GetDownConnectingCharacters(position);
+      if (down_word.size() > 1) {
+        for (char c : down_word) {
+          extra_words_score += kScoreMap[c];
+        }
+      }
       // Blanks score nothing.
       // TODO: Optimize blank usage.
       bool blank = rack.UsesBlank(solution.word()[i]);
@@ -310,7 +321,7 @@ int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
     }
     score += kScoreMap[solution.word()[i]] * multiplier;
   }
-  return score * word_multiplier;
+  return score * word_multiplier + extra_words_score;
 }
 
 void Scrabble::ExpandLeft(string s, pair<int, int> pos,
