@@ -20,6 +20,7 @@ using std::cout;
 using std::endl;
 using std::find;
 using std::find_if;
+using std::future;
 using std::make_pair;
 using std::map;
 using std::max_element;
@@ -123,21 +124,27 @@ Scrabble::Scrabble(const vector<char>& board)
 
 Scrabble::~Scrabble() {}
 
+vector<Scrabble::Solution> Scrabble::TryPositions(
+    const vector<pair<int, int>>& positions, const vector<char>& rack) const {
+  vector<future<vector<Solution>>> futures;
+  for (const auto& position : positions) {
+    futures.emplace_back(std::async(
+        std::launch::async,
+        [this, position, rack]() { return TryPosition(position, rack); }));
+  }
+
+  vector<Solution> solutions;
+  for (auto& future : futures) {
+    vector<Solution> s = future.get();
+    copy(s.begin(), s.end(), std::back_inserter(solutions));
+  }
+  return solutions;
+}
+
 void Scrabble::FindBestMove(const std::vector<char>& rack) {
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();
-  vector<std::future<vector<Solution>>> row_futures;
-  for (const auto& tile : empty_tiles) {
-    row_futures.emplace_back(
-        std::async(std::launch::async,
-                   [this, tile, rack]() { return TryPosition(tile, rack); }));
-  }
 
-  vector<Solution> row_solutions;
-  for (auto& future : row_futures) {
-    vector<Solution> solutions = future.get();
-    copy(solutions.begin(), solutions.end(), std::back_inserter(row_solutions));
-  }
-
+  vector<Solution> row_solutions = TryPositions(empty_tiles, rack);
   auto best_row_solution = std::max_element(
       row_solutions.begin(), row_solutions.end(),
       [this, rack](const Scrabble::Solution& a, const Scrabble::Solution& b) {
@@ -151,14 +158,9 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
   }
 
   cout << "Trying transposed" << endl;
-  vector<char> transposed = Transpose(board_);
-  board_ = transposed;
+  board_ = Transpose(board_);
   empty_tiles = FindEmptyTiles();
-  vector<Solution> column_solutions;
-  for (const auto& tile : empty_tiles) {
-    vector<Solution> s = TryPosition(tile, rack);
-    copy(s.begin(), s.end(), std::back_inserter(column_solutions));
-  }
+  vector<Solution> column_solutions = TryPositions(empty_tiles, rack);
   auto best_column_solution = std::max_element(
       column_solutions.begin(), column_solutions.end(),
       [this, rack](const Scrabble::Solution& a, const Scrabble::Solution& b) {

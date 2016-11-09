@@ -79,6 +79,9 @@ class Scrabble {
 
   std::vector<Solution> TryPosition(std::pair<int, int> position,
                                     const std::vector<char>& rack) const;
+  std::vector<Solution> TryPositions(
+      const std::vector<std::pair<int, int>>& position,
+      const std::vector<char>& rack) const;
   bool TryPosition(const Solution& solution,
                    const std::vector<char>& rack) const;
   int Score(const Solution& solution, const std::vector<char>& rack) const;
