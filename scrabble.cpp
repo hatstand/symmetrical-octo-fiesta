@@ -30,6 +30,8 @@ using std::vector;
 
 namespace {
 
+static const int kGridSize = 15;
+
 static map<char, int> kScoreMap = {
     {'a', 1}, {'b', 4}, {'c', 4},  {'d', 2}, {'e', 1},  {'f', 4}, {'g', 3},
     {'h', 3}, {'i', 1}, {'j', 10}, {'k', 5}, {'l', 2},  {'m', 4}, {'n', 2},
@@ -100,8 +102,6 @@ vector<string> CompleteKeys(const dawgdic::Dictionary& dictionary,
 }
 
 bool IsRealCharacter(char c) { return c >= 'a' && c <= 'z'; }
-
-static const int kGridSize = 15;
 
 vector<char> Transpose(const vector<char> board) {
   vector<char> transposed(kGridSize * kGridSize);

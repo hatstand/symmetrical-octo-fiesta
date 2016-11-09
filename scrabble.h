@@ -83,7 +83,6 @@ class Scrabble {
                    const std::vector<char>& rack) const;
   int Score(const Solution& solution, const std::vector<char>& rack) const;
 
-  static const int kGridSize = 15;
   std::vector<char> board_;
 
   std::unique_ptr<dawgdic::Dawg> dawg_;
