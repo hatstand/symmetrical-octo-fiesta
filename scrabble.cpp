@@ -53,14 +53,12 @@ dawgdic::Dawg* BuildDawg() {
   }
   dawgdic::Dawg* dawg = new dawgdic::Dawg;
   builder.Finish(dawg);
-  std::cout << "DAWG size: " << dawg->size() << std::endl;
   return dawg;
 }
 
 dawgdic::Dictionary* BuildDictionary(const dawgdic::Dawg& dawg) {
   dawgdic::Dictionary* dictionary = new dawgdic::Dictionary;
   dawgdic::DictionaryBuilder::Build(dawg, dictionary);
-  cout << "Dictionary size: " << dictionary->size() << endl;
   return dictionary;
 }
 
@@ -157,7 +155,6 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
          << " with a score of: " << Score(*best_row_solution, rack) << endl;
   }
 
-  cout << "Trying transposed" << endl;
   board_ = Transpose(board_);
   empty_tiles = FindEmptyTiles();
   vector<Solution> column_solutions = TryPositions(empty_tiles, rack);
