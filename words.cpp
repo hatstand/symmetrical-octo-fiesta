@@ -17,7 +17,7 @@ using std::to_string;
 using std::vector;
 
 static const int kGridSize = 15;
-static const int kTabletSize = 7;
+static const int kRackSize = 7;
 
 void ShowImage(const cv::Mat& image) {
   cv::imshow("foo", image);
@@ -131,7 +131,7 @@ void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
   }
 }
 
-vector<char> RecogniseTablet(const cv::Mat& image, KNearest* nearest) {
+vector<char> RecogniseRack(const cv::Mat& image, KNearest* nearest) {
   const int grid_start = image.size().height / 4;
   const int square_width = image.size().width / kGridSize;
   int fudge = 24;
@@ -139,7 +139,7 @@ vector<char> RecogniseTablet(const cv::Mat& image, KNearest* nearest) {
   int guess = estimate + square_width * 2 + fudge;
   const int tablet_width = image.size().width / 7;
   vector<char> ret;
-  for (int i = 0; i < kTabletSize; ++i) {
+  for (int i = 0; i < kRackSize; ++i) {
     cv::Point top_left(i * tablet_width, estimate);
     cv::Point bottom_right(i * tablet_width + tablet_width, guess);
 
@@ -170,7 +170,7 @@ void RecogniseGrid(const string& path, KNearest* nearest) {
     }
   }
 
-  vector<char> rack = RecogniseTablet(image, nearest);
+  vector<char> rack = RecogniseRack(image, nearest);
   cout << "RACK:" << endl;
   for (char c : rack) {
     cout << c << " ";
