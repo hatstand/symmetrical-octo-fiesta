@@ -16,6 +16,8 @@ using std::string;
 using std::to_string;
 using std::vector;
 
+namespace {
+
 static const int kGridSize = 15;
 static const int kRackSize = 7;
 
@@ -181,6 +183,7 @@ void RecogniseGrid(const string& path, KNearest* nearest) {
   scrabble.PrintBoard();
   scrabble.FindBestMove(rack);
 }
+}  // namespace
 
 int main(int argc, char** argv) {
   KNearest* nearest = Foo();
