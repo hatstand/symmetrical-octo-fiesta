@@ -115,14 +115,13 @@ vector<char> Transpose(const vector<char> board) {
 }
 }
 
-Scrabble::Scrabble(const char* board)
-    : board_(board, board + kGridSize * kGridSize),
+Scrabble::Scrabble(const vector<char>& board)
+    : board_(board),
       dawg_(BuildDawg()),
       dictionary_(BuildDictionary(*dawg_)),
       guide_(BuildGuide(*dawg_, *dictionary_)) {}
 
-Scrabble::~Scrabble() {  // free(board_);
-}
+Scrabble::~Scrabble() {}
 
 void Scrabble::FindBestMove(const std::vector<char>& rack) {
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();

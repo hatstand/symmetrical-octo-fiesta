@@ -23,7 +23,7 @@ class Guide;
 
 class Scrabble {
  public:
-  explicit Scrabble(const char* board);
+  explicit Scrabble(const std::vector<char>& board);
   ~Scrabble();
 
   void FindBestMove(const std::vector<char>& tablet);

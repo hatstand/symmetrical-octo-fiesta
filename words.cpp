@@ -3,11 +3,18 @@
 #include <sys/types.h>
 
 #include <iostream>
+#include <vector>
 
 #include <opencv2/highgui/highgui.hpp>
 
 #include "knearest.h"
 #include "scrabble.h"
+
+using std::cout;
+using std::endl;
+using std::string;
+using std::to_string;
+using std::vector;
 
 static const int kGridSize = 15;
 static const int kTabletSize = 7;
@@ -17,15 +24,15 @@ void ShowImage(const cv::Mat& image) {
   cv::waitKey(0);
 }
 
-int GetNext(const std::string& path) {
+int GetNext(const string& path) {
   DIR* dir = opendir(path.c_str());
 
   int next = 0;
 
   dirent* directory_info = nullptr;
   while ((directory_info = readdir(dir))) {
-    std::string name(directory_info->d_name);
-    std::string number;
+    string name(directory_info->d_name);
+    string number;
     for (char c : name) {
       if (c >= '0' && c <= '9') {
         number += c;
@@ -52,19 +59,17 @@ char Train(const cv::Mat& image) {
     key = '_';
   }
 
-  std::string directory("training/");
+  string directory("training/");
   directory += key;
   mkdir(directory.c_str(), 0777);
 
-  std::string filename(directory + "/" + std::to_string(GetNext(directory)) +
-                       ".png");
+  string filename(directory + "/" + to_string(GetNext(directory)) + ".png");
 
   imwrite(filename, image);
   return key;
 }
 
-void TrainDirectory(const std::string path, const std::string name,
-                    KNearest* knearest) {
+void TrainDirectory(const string path, const string name, KNearest* knearest) {
   DIR* training_directory = opendir(path.c_str());
 
   dirent* directory_info = nullptr;
@@ -72,7 +77,7 @@ void TrainDirectory(const std::string path, const std::string name,
     if (directory_info->d_type != DT_REG) {
       continue;
     }
-    std::string file_path = path + "/";
+    string file_path = path + "/";
     file_path += directory_info->d_name;
     cv::Mat image = cv::imread(file_path, 0);
     knearest->Learn(image, *path.rbegin());
@@ -94,7 +99,7 @@ KNearest* Foo() {
       continue;
     }
 
-    std::string path("training/");
+    string path("training/");
     path += directory_info->d_name;
 
     TrainDirectory(path, directory_info->d_name, knearest);
@@ -126,14 +131,14 @@ void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
   }
 }
 
-std::vector<char> RecogniseTablet(const cv::Mat& image, KNearest* nearest) {
+vector<char> RecogniseTablet(const cv::Mat& image, KNearest* nearest) {
   const int grid_start = image.size().height / 4;
   const int square_width = image.size().width / kGridSize;
   int fudge = 24;
   int estimate = grid_start + square_width * kGridSize + fudge;
   int guess = estimate + square_width * 2 + fudge;
   const int tablet_width = image.size().width / 7;
-  std::vector<char> ret;
+  vector<char> ret;
   for (int i = 0; i < kTabletSize; ++i) {
     cv::Point top_left(i * tablet_width, estimate);
     cv::Point bottom_right(i * tablet_width + tablet_width, guess);
@@ -144,13 +149,13 @@ std::vector<char> RecogniseTablet(const cv::Mat& image, KNearest* nearest) {
   return ret;
 }
 
-void RecogniseGrid(const std::string& path, KNearest* nearest) {
+void RecogniseGrid(const string& path, KNearest* nearest) {
   cv::Mat image = cv::imread(path, 0);
   cv::bitwise_not(image, image);
   const int grid_start = image.size().height / 4;
   const int square_width = image.size().width / kGridSize;
 
-  char* grid = static_cast<char*>(malloc(kGridSize * kGridSize));
+  vector<char> grid(kGridSize * kGridSize);
 
   for (int i = 0; i < kGridSize; ++i) {
     for (int j = 0; j < kGridSize; ++j) {
@@ -165,18 +170,16 @@ void RecogniseGrid(const std::string& path, KNearest* nearest) {
     }
   }
 
-  std::vector<char> tablet = RecogniseTablet(image, nearest);
-  std::cout << "TABLET:" << std::endl;
-  for (char c : tablet) {
-    std::cout << c << " ";
+  vector<char> rack = RecogniseTablet(image, nearest);
+  cout << "RACK:" << endl;
+  for (char c : rack) {
+    cout << c << " ";
   }
-  std::cout << std::endl;
+  cout << endl;
 
   Scrabble scrabble(grid);
   scrabble.PrintBoard();
-  scrabble.FindBestMove(tablet);
-  scrabble.PrintBoard();
-  free(grid);
+  scrabble.FindBestMove(rack);
 }
 
 int main(int argc, char** argv) {
