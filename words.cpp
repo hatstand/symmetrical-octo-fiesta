@@ -192,7 +192,8 @@ void RecogniseGrid(const string& path, KNearest* nearest) {
 }  // namespace
 
 int main(int argc, char** argv) {
-  KNearest* nearest = Foo();
-  RecogniseGrid(argv[1], nearest);
+  KNearest nearest;
+  nearest.Load("model");
+  RecogniseGrid(argv[1], &nearest);
   return 0;
 }

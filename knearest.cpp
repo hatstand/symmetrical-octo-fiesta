@@ -4,6 +4,9 @@
 
 #include <opencv2/imgproc/imgproc.hpp>
 
+using std::cerr;
+using std::endl;
+
 namespace {
 static const int kOcrMaxDistance = 60000;
 }
@@ -41,4 +44,13 @@ cv::Mat KNearest::PrepareSample(const cv::Mat& image) {
   cv::Mat sample;
   roi.reshape(1, 1).convertTo(sample, CV_32F);
   return sample;
+}
+
+void KNearest::Save(const std::string& path) { model_->save(path); }
+
+void KNearest::Load(const std::string& path) {
+  model_ = cv::ml::KNearest::load<cv::ml::KNearest>(path);
+  if (!model_) {
+    cerr << "Failed to load KNearest model" << endl;
+  }
 }

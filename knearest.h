@@ -11,6 +11,8 @@ class KNearest {
   void Learn(const cv::Mat& image, char c);
   void Train();
   char Recognise(const cv::Mat& image);
+  void Save(const std::string& path);
+  void Load(const std::string& path);
 
  private:
   cv::Mat PrepareSample(const cv::Mat& image);
