@@ -1,0 +1,19 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "dawgdic",
+    hdrs = glob(["src/dawgdic/*.h"]),
+    includes = ["src"],
+)
+
+cc_binary(
+    name = "dawgdic-build",
+    srcs = ["src/dawgdic-build.cc"],
+    deps = [":dawgdic"],
+)
+
+cc_binary(
+    name = "dawgdic-find",
+    srcs = ["src/dawgdic-find.cc"],
+    deps = [":dawgdic"],
+)

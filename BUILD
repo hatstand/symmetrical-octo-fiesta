@@ -18,6 +18,9 @@ cc_library(
         "scrabble.cpp",
         "scrabble.h",
     ],
+    deps = [
+        "@dawgdic//:dawgdic",
+    ],
 )
 
 cc_library(

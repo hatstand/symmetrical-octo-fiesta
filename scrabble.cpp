@@ -8,13 +8,13 @@
 #include <map>
 #include <set>
 
-#include <dawgdic/completer.h>
-#include <dawgdic/dawg-builder.h>
-#include <dawgdic/dawg.h>
-#include <dawgdic/dictionary-builder.h>
-#include <dawgdic/dictionary.h>
-#include <dawgdic/guide-builder.h>
-#include <dawgdic/guide.h>
+#include "dawgdic/completer.h"
+#include "dawgdic/dawg-builder.h"
+#include "dawgdic/dawg.h"
+#include "dawgdic/dictionary-builder.h"
+#include "dawgdic/dictionary.h"
+#include "dawgdic/guide-builder.h"
+#include "dawgdic/guide.h"
 
 using std::copy;
 using std::cout;
