@@ -6,6 +6,7 @@
 #include <future>
 #include <iostream>
 #include <map>
+#include <set>
 
 #include <dawgdic/completer.h>
 #include <dawgdic/dawg-builder.h>
@@ -25,6 +26,7 @@ using std::make_pair;
 using std::map;
 using std::max_element;
 using std::pair;
+using std::set;
 using std::string;
 using std::transform;
 using std::vector;
@@ -169,12 +171,28 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
        << " with a score of: " << Score(*best_column_solution, rack) << endl;
 }
 
+namespace {
+set<char> GetPotentialStartingLetters(const vector<char>& rack) {
+  set<char> ret;
+  for (char c : rack) {
+    if (IsRealCharacter(c)) {
+      ret.insert(c);
+    } else if (c == '4') {
+      for (char x = 'a'; x < 'z'; ++x) {
+        ret.insert(x);
+        return ret;
+      }
+    }
+  }
+  return ret;
+}
+}
+
 vector<Scrabble::Solution> Scrabble::TryPosition(
     pair<int, int> position, const vector<char>& rack) const {
   vector<Solution> solutions;
-  // TODO: Start words with a blank.
-  // Try starting a word here with each tile in the rack.
-  for (char c : rack) {
+  // Try starting a word here with each unique tile in the rack.
+  for (char c : GetPotentialStartingLetters(rack)) {
     // Construct the actual word generated which includes tiles to the left &
     // right.
     string left = GetLeftConnectingCharacters(position);
