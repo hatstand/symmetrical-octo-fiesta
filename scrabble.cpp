@@ -191,6 +191,10 @@ set<char> GetPotentialStartingLetters(const vector<char>& rack) {
 vector<Scrabble::Solution> Scrabble::TryPosition(
     pair<int, int> position, const vector<char>& rack) const {
   vector<Solution> solutions;
+  if (!RowHasAnchors(position.second)) {
+    return solutions;
+  }
+
   // Try starting a word here with each unique tile in the rack.
   for (char c : GetPotentialStartingLetters(rack)) {
     // Construct the actual word generated which includes tiles to the left &
@@ -476,6 +480,15 @@ vector<pair<int, int>> Scrabble::FindAnchors() const {
 
 bool Scrabble::IsAnchor(int x, int y) const {
   return !HasPlacedTile(x, y) && HasNeighbours(x, y);
+}
+
+bool Scrabble::RowHasAnchors(int y) const {
+  for (int x = 0; x < kGridSize; ++x) {
+    if (IsAnchor(x, y)) {
+      return true;
+    }
+  }
+  return false;
 }
 
 vector<pair<int, int>> Scrabble::FindEmptyTiles() const {

@@ -64,6 +64,7 @@ class Scrabble {
   bool HasPlacedTile(int i, int j) const;
   bool HasPlacedTile(char c) const;
   bool IsAnchor(int x, int y) const;
+  bool RowHasAnchors(int y) const;
   std::vector<std::pair<int, int>> FindAnchors() const;
   std::vector<std::pair<int, int>> FindEmptyTiles() const;
   bool IsValidPlacement(char c, std::pair<int, int> pos) const;
