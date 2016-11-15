@@ -3,7 +3,7 @@
 
 #include <memory>
 
-#include <opencv2/ml/ml.hpp>
+#include "opencv2/ml/ml.hpp"
 
 class KNearest {
  public:
