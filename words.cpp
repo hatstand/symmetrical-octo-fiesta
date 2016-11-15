@@ -73,51 +73,6 @@ char Train(const cv::Mat& image) {
   return key;
 }
 
-void TrainDirectory(const string path, const string name, KNearest* knearest) {
-  DIR* training_directory = opendir(path.c_str());
-
-  dirent* directory_info = nullptr;
-  while ((directory_info = readdir(training_directory))) {
-    if (directory_info->d_type != DT_REG) {
-      continue;
-    }
-    string file_path = path + "/";
-    file_path += directory_info->d_name;
-    cv::Mat image = cv::imread(file_path, 0);
-    if (image.data == nullptr) {
-      cerr << "Failed to load image: " << file_path << endl;
-      exit(1);
-    }
-    knearest->Learn(image, *path.rbegin());
-  }
-  closedir(training_directory);
-}
-
-KNearest* Foo() {
-  DIR* training_directory = opendir("training");
-
-  dirent* directory_info = nullptr;
-  KNearest* knearest = new KNearest;
-  while ((directory_info = readdir(training_directory))) {
-    if (directory_info->d_type != DT_DIR) {
-      continue;
-    }
-    if (strcmp(directory_info->d_name, ".") == 0 ||
-        strcmp(directory_info->d_name, "..") == 0) {
-      continue;
-    }
-
-    string path("training/");
-    path += directory_info->d_name;
-
-    TrainDirectory(path, directory_info->d_name, knearest);
-  }
-  closedir(training_directory);
-
-  knearest->Train();
-  return knearest;
-}
-
 char Recognise(KNearest* nearest, const cv::Mat& image) {
   char recognised = nearest->Recognise(image);
   if (recognised == '?') {
@@ -125,18 +80,6 @@ char Recognise(KNearest* nearest, const cv::Mat& image) {
     return Train(image);
   }
   return recognised;
-}
-
-void DrawLine(const cv::Vec2f& line, cv::Mat* image, cv::Scalar rgb) {
-  if (line[1] != 0) {
-    float m = -1 / tan(line[1]);
-    float c = line[0] / sin(line[1]);
-    cv::line(*image, cv::Point(0, c),
-             cv::Point(image->size().width, m * image->size().width + c), rgb);
-  } else {
-    cv::line(*image, cv::Point(line[0], 0),
-             cv::Point(line[0], image->size().height), rgb);
-  }
 }
 
 vector<char> RecogniseRack(const cv::Mat& image, KNearest* nearest) {
