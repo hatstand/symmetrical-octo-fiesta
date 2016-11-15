@@ -7,6 +7,7 @@
 
 class KNearest {
  public:
+  KNearest();
   void Learn(const cv::Mat& image, char c);
   void Train();
   char Recognise(const cv::Mat& image);
@@ -17,7 +18,7 @@ class KNearest {
   cv::Mat samples_;
   cv::Mat responses_;
 
-  std::unique_ptr<cv::KNearest> model_;
+  cv::Ptr<cv::ml::KNearest> model_;
 };
 
 #endif  // KNEAREST_H

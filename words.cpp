@@ -6,10 +6,12 @@
 #include <vector>
 
 #include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 
 #include "knearest.h"
 #include "scrabble.h"
 
+using std::cerr;
 using std::cout;
 using std::endl;
 using std::string;
@@ -82,6 +84,10 @@ void TrainDirectory(const string path, const string name, KNearest* knearest) {
     string file_path = path + "/";
     file_path += directory_info->d_name;
     cv::Mat image = cv::imread(file_path, 0);
+    if (image.data == nullptr) {
+      cerr << "Failed to load image: " << file_path << endl;
+      exit(1);
+    }
     knearest->Learn(image, *path.rbegin());
   }
   closedir(training_directory);

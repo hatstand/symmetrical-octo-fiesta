@@ -1,0 +1,177 @@
+package(default_visibility = ["//visibility:public"])
+
+cc_library(
+    name = "opencv_core",
+    srcs = glob([
+        "modules/core/src/**/*.cpp",
+        "modules/core/src/**/*.hpp",
+        "modules/core/include/**/*.hpp",
+        "modules/core/include/**/*.h",
+    ]) + [
+        "cvconfig.h",
+        "custom_hal.hpp",
+        "opencl_kernels_core.hpp",
+        "version_string.inc",
+    ],
+    hdrs = ["modules/core/include/opencv2/core/opencl/ocl_defs.hpp"],
+    copts = [
+        "-D__OPENCV_BUILD",
+    ],
+    includes = [
+        ".",
+        "modules/core/include",
+    ],
+    linkopts = [
+        "-ldl",
+        "-lz",
+        "-lpthread",
+    ],
+)
+
+genrule(
+    name = "opencv_core_kernels",
+    outs = ["opencl_kernels_core.hpp"],
+    cmd = """
+      echo '#include "opencv2/core/ocl.hpp"' > $@
+      echo '#include "opencv2/core/ocl_genbase.hpp"' > $@
+      echo '#include "opencv2/core/opencl/ocl_defs.hpp"' > $@
+    """,
+)
+
+genrule(
+    name = "cvconfig",
+    outs = ["cvconfig.h"],
+    cmd = """
+      echo '#define BUILD_SHARED_LIBS' > $@
+      echo '#define HAVE_PNG' > $@
+    """,
+)
+
+genrule(
+    name = "custom_hal",
+    outs = ["custom_hal.hpp"],
+    cmd = "touch $@",
+)
+
+genrule(
+    name = "version_string",
+    outs = ["version_string.inc"],
+    cmd = "echo '\"OpenCV 3.1.0\"' > $@",
+)
+
+cc_library(
+    name = "opencv_imgproc",
+    srcs = glob([
+        "modules/imgproc/src/**/*.cpp",
+        "modules/imgproc/src/**/*.hpp",
+        "modules/imgproc/src/**/*.h",
+        "modules/imgproc/include/**/*.hpp",
+        "modules/imgproc/include/**/*.h",
+    ]) + ["opencl_kernels_imgproc.hpp"],
+    copts = ["-D__OPENCV_BUILD"],
+    includes = [
+        ".",
+        "modules/core/include",
+        "modules/imgproc/include",
+    ],
+    deps = [":opencv_core"],
+)
+
+genrule(
+    name = "opencv_imgproc_kernels",
+    outs = ["opencl_kernels_imgproc.hpp"],
+    cmd = """
+      echo '#include "opencv2/core/ocl.hpp"' > $@
+      echo '#include "opencv2/core/ocl_genbase.hpp"' > $@
+      echo '#include "opencv2/core/opencl/ocl_defs.hpp"' > $@
+    """,
+)
+
+cc_library(
+    name = "opencv_ml",
+    srcs = glob([
+        "modules/ml/src/**/*.cpp",
+        "modules/ml/src/**/*.hpp",
+        "modules/ml/include/**/*.hpp",
+    ]),
+    copts = ["-D__OPENCV_BUILD"],
+    includes = ["modules/ml/include"],
+    deps = [":opencv_core"],
+)
+
+cc_library(
+    name = "opencv_highgui",
+    srcs = glob(
+        [
+            "modules/highgui/src/**/*.cpp",
+            "modules/highgui/src/**/*.hpp",
+            "modules/highgui/include/**/*.hpp",
+            "modules/highgui/include/**/*.h",
+        ],
+        exclude = [
+            "modules/highgui/src/window_winrt_bridge.cpp",
+            "modules/highgui/src/window_carbon.cpp",
+            "modules/highgui/src/window_winrt.cpp",
+            "modules/highgui/src/window_w32.cpp",
+            "modules/highgui/src/window_QT.cpp",
+            "modules/highgui/src/window_gtk.cpp",
+        ],
+    ),
+    copts = ["-D__OPENCV_BUILD"],
+    includes = ["modules/highgui/include"],
+    deps = [
+        ":opencv_core",
+        ":opencv_imgcodecs",
+        ":opencv_videoio",
+    ],
+)
+
+cc_library(
+    name = "opencv_imgcodecs",
+    srcs = glob([
+        "modules/imgcodecs/src/**/*.cpp",
+        "modules/imgcodecs/src/**/*.hpp",
+        "modules/imgcodecs/include/**/*.hpp",
+        "modules/imgcodecs/include/**/*.h",
+    ]),
+    copts = ["-D__OPENCV_BUILD"],
+    includes = ["modules/imgcodecs/include"],
+    linkopts = [
+        "-lpng",
+    ],
+    deps = [
+        ":opencv_core",
+        ":opencv_imgproc",
+    ],
+)
+
+cc_library(
+    name = "opencv_videoio",
+    srcs = glob(
+        [
+            "modules/videoio/src/**/*.cpp",
+            "modules/videoio/src/**/*.hpp",
+            "modules/videoio/include/**/*.hpp",
+            "modules/videoio/include/**/*.h",
+        ],
+        exclude = [
+            "modules/videoio/src/cap_giganetix.cpp",
+            "modules/videoio/src/cap_gstreamer.cpp",
+            "modules/videoio/src/cap_qt.cpp",
+            "modules/videoio/src/cap_unicap.cpp",
+            "modules/videoio/src/cap_vfw.cpp",
+            "modules/videoio/src/cap_winrt/**/*",
+            "modules/videoio/src/cap_winrt_bridge.cpp",
+            "modules/videoio/src/cap_winrt_capture.cpp",
+            "modules/videoio/src/cap_winrt_video.cpp",
+            "modules/videoio/src/cap_ximea.cpp",
+            "modules/videoio/src/cap_xine.cpp",
+        ],
+    ),
+    copts = ["-D__OPENCV_BUILD"],
+    includes = ["modules/videoio/include"],
+    deps = [
+        ":opencv_core",
+        ":opencv_imgcodecs",
+    ],
+)
