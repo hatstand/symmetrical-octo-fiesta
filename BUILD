@@ -1,4 +1,5 @@
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
+load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_compile")
 
 cc_binary(
     name = "words",
@@ -71,6 +72,13 @@ cc_binary(
 cc_proto_library(
     name = "service",
     protos = ["service.proto"],
+    with_grpc = True,
+)
+
+java_proto_compile(
+    name = "service_java",
+    protos = ["service.proto"],
+    visibility = ["//visibility:public"],
     with_grpc = True,
 )
 

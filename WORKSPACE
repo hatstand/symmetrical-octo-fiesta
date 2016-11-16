@@ -31,5 +31,20 @@ git_repository(
 )
 
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cpp_proto_repositories")
+load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_repositories")
 
 cpp_proto_repositories()
+
+java_proto_repositories()
+
+android_sdk_repository(
+    name = "androidsdk",
+    api_level = 25,
+    build_tools_version = "25.0.0",
+    path = "/usr/local/google/home/johnmaguire/build/android-sdk-linux",
+)
+
+maven_jar(
+    name = "jsr250",
+    artifact = "javax.annotation:jsr250-api:1.0",
+)
