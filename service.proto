@@ -23,4 +23,6 @@ message Response {
 
     string word = 4;
   }
+
+  repeated Solution solution = 1;
 }

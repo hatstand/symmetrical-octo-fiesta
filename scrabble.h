@@ -26,11 +26,8 @@ class Scrabble {
   explicit Scrabble(const std::vector<char>& board);
   ~Scrabble();
 
-  void FindBestMove(const std::vector<char>& tablet);
-
   void PrintBoard() const;
 
- private:
   class Solution {
    public:
     Solution(int x, int y, const std::string& word);
@@ -41,12 +38,27 @@ class Scrabble {
 
     const std::string& word() const { return word_; }
 
+    enum class Direction {
+      COLUMN,
+      ROW,
+    };
+    Direction direction() const { return direction_; }
+
+    void Transpose() {
+      direction_ =
+          direction_ == Direction::COLUMN ? Direction::ROW : Direction::COLUMN;
+      std::swap(x_, y_);
+    }
+
    private:
     int x_;
     int y_;
     std::string word_;
+    Direction direction_;
   };
+  std::vector<Solution> FindBestMove(const std::vector<char>& tablet);
 
+ private:
   class Rack {
    public:
     explicit Rack(const std::vector<char>& rack);

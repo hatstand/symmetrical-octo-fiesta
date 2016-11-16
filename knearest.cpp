@@ -23,7 +23,7 @@ void KNearest::Train() {
                 cv::InputArray(responses_));
 }
 
-char KNearest::Recognise(const cv::Mat& image) {
+char KNearest::Recognise(const cv::Mat& image) const {
   cv::Mat results;
   cv::Mat neighbour_responses;
   cv::Mat distances;
@@ -38,7 +38,7 @@ char KNearest::Recognise(const cv::Mat& image) {
   return '?';
 }
 
-cv::Mat KNearest::PrepareSample(const cv::Mat& image) {
+cv::Mat KNearest::PrepareSample(const cv::Mat& image) const {
   cv::Mat roi;
   cv::resize(image, roi, cv::Size(20, 20));
   cv::Mat sample;

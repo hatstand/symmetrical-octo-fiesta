@@ -141,8 +141,11 @@ vector<Scrabble::Solution> Scrabble::TryPositions(
   return solutions;
 }
 
-void Scrabble::FindBestMove(const std::vector<char>& rack) {
+vector<Scrabble::Solution> Scrabble::FindBestMove(
+    const std::vector<char>& rack) {
   vector<pair<int, int>> empty_tiles = FindEmptyTiles();
+
+  vector<Solution> ret;
 
   vector<Solution> row_solutions = TryPositions(empty_tiles, rack);
   auto best_row_solution = std::max_element(
@@ -155,6 +158,7 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
     cout << "Best row word is: " << best_row_solution->word()
          << " at: " << best_row_solution->x() << "," << best_row_solution->y()
          << " with a score of: " << Score(*best_row_solution, rack) << endl;
+    ret.push_back(*best_row_solution);
   }
 
   board_ = Transpose(board_);
@@ -165,10 +169,15 @@ void Scrabble::FindBestMove(const std::vector<char>& rack) {
       [this, rack](const Scrabble::Solution& a, const Scrabble::Solution& b) {
         return Score(a, rack) < Score(b, rack);
       });
-  cout << "Best column word is: " << best_column_solution->word()
-       << " at: " << best_column_solution->x() << ","
-       << best_column_solution->y()
-       << " with a score of: " << Score(*best_column_solution, rack) << endl;
+  if (best_column_solution != column_solutions.end()) {
+    cout << "Best column word is: " << best_column_solution->word()
+         << " at: " << best_column_solution->x() << ","
+         << best_column_solution->y()
+         << " with a score of: " << Score(*best_column_solution, rack) << endl;
+  }
+  best_column_solution->Transpose();
+  ret.push_back(*best_column_solution);
+  return ret;
 }
 
 namespace {
@@ -221,7 +230,7 @@ vector<Scrabble::Solution> Scrabble::TryPosition(
 }
 
 Scrabble::Solution::Solution(int x, int y, const string& word)
-    : x_(x), y_(y), word_(word) {}
+    : x_(x), y_(y), word_(word), direction_(Direction::ROW) {}
 
 Scrabble::Solution::Solution(pair<int, int> pos, const string& word)
     : Scrabble::Solution::Solution(pos.first, pos.second, word) {}

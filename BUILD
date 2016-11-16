@@ -51,6 +51,18 @@ cc_binary(
 cc_binary(
     name = "server",
     srcs = ["server.cpp"],
+    data = ["model"],
+    deps = [
+        ":knearest",
+        ":scrabble",
+        ":service",
+        "@opencv//:opencv_imgcodecs",
+    ],
+)
+
+cc_binary(
+    name = "client",
+    srcs = ["client.cpp"],
     deps = [
         ":service",
     ],
