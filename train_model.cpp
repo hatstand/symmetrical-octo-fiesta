@@ -7,11 +7,15 @@
 #include <iostream>
 #include <string>
 
+#include <gflags/gflags.h>
+
 #include "knearest.h"
 
 using std::cerr;
 using std::endl;
 using std::string;
+
+DEFINE_string(output, "", "Path to write trained model to");
 
 void TrainDirectory(const string& path, const string& name,
                     KNearest* knearest) {
@@ -35,9 +39,10 @@ void TrainDirectory(const string& path, const string& name,
 }
 
 int main(int argc, char** argv) {
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
   KNearest knearest;
 
-  for (int i = 2; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
     string path(argv[i]);
     size_t index = path.rfind('/');
     cv::Mat image = cv::imread(path, 0);
@@ -45,7 +50,7 @@ int main(int argc, char** argv) {
   }
 
   knearest.Train();
-  knearest.Save(argv[1]);
+  knearest.Save(FLAGS_output);
 
   return 0;
 }

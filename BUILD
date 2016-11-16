@@ -41,6 +41,7 @@ cc_binary(
     srcs = ["train_model.cpp"],
     deps = [
         ":knearest",
+        "//external:gflags",
         "@opencv//:opencv_highgui",
     ],
 )
@@ -49,8 +50,6 @@ genrule(
     name = "gen_model",
     srcs = glob(["training/**/*.png"]),
     outs = ["model"],
-    cmd = """
-      $(location :train_model) $@ $(SRCS)
-    """,
+    cmd = "$(location :train_model) --output $@ $(SRCS)",
     tools = [":train_model"],
 )
