@@ -22,3 +22,14 @@ new_git_repository(
     remote = "https://github.com/opencv/opencv",
     tag = "3.1.0",
 )
+
+git_repository(
+    name = "org_pubref_rules_protobuf",
+    #tag = "v0.7.0",
+    commit = "404977c0290704aacca00fac8ca0ecaeda09a7cf",
+    remote = "https://github.com/pubref/rules_protobuf",
+)
+
+load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cpp_proto_repositories")
+
+cpp_proto_repositories()

@@ -1,3 +1,5 @@
+load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
+
 cc_binary(
     name = "words",
     srcs = ["words.cpp"],
@@ -44,6 +46,20 @@ cc_binary(
         "//external:gflags",
         "@opencv//:opencv_highgui",
     ],
+)
+
+cc_binary(
+    name = "server",
+    srcs = ["server.cpp"],
+    deps = [
+        ":service",
+    ],
+)
+
+cc_proto_library(
+    name = "service",
+    protos = ["service.proto"],
+    with_grpc = True,
 )
 
 genrule(
