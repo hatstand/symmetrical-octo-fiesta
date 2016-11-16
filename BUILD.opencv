@@ -1,4 +1,4 @@
-package(default_visibility = ["//visibility:public"])
+package(default_visibility = ["//visibility:private"])
 
 cc_library(
     name = "opencv_core",
@@ -26,6 +26,7 @@ cc_library(
         "-lz",
         "-lpthread",
     ],
+    visibility = ["//visibility:public"],
 )
 
 genrule(
@@ -74,6 +75,7 @@ cc_library(
         "modules/core/include",
         "modules/imgproc/include",
     ],
+    visibility = ["//visibility:public"],
     deps = [":opencv_core"],
 )
 
@@ -96,6 +98,7 @@ cc_library(
     ]),
     copts = ["-D__OPENCV_BUILD"],
     includes = ["modules/ml/include"],
+    visibility = ["//visibility:public"],
     deps = [":opencv_core"],
 )
 
@@ -120,6 +123,7 @@ cc_library(
     hdrs = ["modules/highgui/include/opencv2/highgui.hpp"],
     copts = ["-D__OPENCV_BUILD"],
     includes = ["modules/highgui/include"],
+    visibility = ["//visibility:public"],
     deps = [
         ":opencv_core",
         ":opencv_imgcodecs",
@@ -140,6 +144,7 @@ cc_library(
     linkopts = [
         "-lpng",
     ],
+    visibility = ["//visibility:public"],
     deps = [
         ":opencv_core",
         ":opencv_imgproc",
@@ -171,6 +176,7 @@ cc_library(
     ),
     copts = ["-D__OPENCV_BUILD"],
     includes = ["modules/videoio/include"],
+    visibility = ["//visibility:public"],
     deps = [
         ":opencv_core",
         ":opencv_imgcodecs",
