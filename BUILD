@@ -67,6 +67,7 @@ cc_binary(
     srcs = ["client.cpp"],
     deps = [
         ":service",
+        "//external:gflags",
     ],
 )
 
