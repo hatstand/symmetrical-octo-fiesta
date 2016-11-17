@@ -16,6 +16,19 @@ bind(
     actual = "@gflags_git//:gflags",
 )
 
+new_http_archive(
+    name = "libpng_http",
+    build_file = "BUILD.libpng",
+    sha256 = "81bfc8f16ed125622c0c5ad44eeffda19e7a7c7e32f47e43c8932bf32deae7cc",
+    strip_prefix = "libpng-1.6.26",
+    url = "http://vorboss.dl.sourceforge.net/project/libpng/libpng16/1.6.26/libpng-1.6.26.tar.gz",
+)
+
+bind(
+    name = "libpng",
+    actual = "@libpng_http//:libpng",
+)
+
 new_git_repository(
     name = "opencv",
     build_file = "BUILD.opencv",

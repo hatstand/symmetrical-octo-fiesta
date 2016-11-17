@@ -153,14 +153,15 @@ cc_library(
         "modules/imgcodecs/include/**/*.h",
     ]),
     copts = ["-D__OPENCV_BUILD"],
-    includes = ["modules/imgcodecs/include"],
-    linkopts = [
-        "-lpng",
+    includes = [
+        "../libpng_http",
+        "modules/imgcodecs/include",
     ],
     visibility = ["//visibility:public"],
     deps = [
         ":opencv_core",
         ":opencv_imgproc",
+        "@libpng_http//:libpng",
     ],
 )
 
