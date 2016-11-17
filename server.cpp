@@ -87,6 +87,9 @@ class CheaterServiceImpl final : public words::Cheater::Service {
     vector<char> grid = RecogniseGrid(image, *knearest_);
     vector<char> rack = RecogniseRack(image, *knearest_);
 
+    response->mutable_board()->set_data(grid.data(), grid.size());
+    response->mutable_rack()->set_data(rack.data(), rack.size());
+
     Scrabble scrabble(grid);
     scrabble.PrintBoard();
     vector<Scrabble::Solution> solutions = scrabble.FindBestMove(rack);

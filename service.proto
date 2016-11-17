@@ -10,6 +10,15 @@ message Request {
   bytes image = 1;
 }
 
+message Board {
+  // Row-major array of bytes representing board.
+  bytes data = 1;
+}
+
+message Rack {
+  bytes data = 1;
+}
+
 message Response {
   message Solution {
     int32 x = 1;
@@ -26,4 +35,6 @@ message Response {
   }
 
   repeated Solution solution = 1;
+  Board board = 2;
+  Rack rack = 3;
 }
