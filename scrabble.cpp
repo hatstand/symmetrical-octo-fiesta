@@ -155,9 +155,10 @@ vector<Scrabble::Solution> Scrabble::FindBestMove(
       });
 
   if (best_row_solution != row_solutions.end()) {
+    best_row_solution->set_score(Score(*best_row_solution, rack));
     cout << "Best row word is: " << best_row_solution->word()
          << " at: " << best_row_solution->x() << "," << best_row_solution->y()
-         << " with a score of: " << Score(*best_row_solution, rack) << endl;
+         << " with a score of: " << best_row_solution->score() << endl;
     ret.push_back(*best_row_solution);
   }
 
@@ -170,10 +171,11 @@ vector<Scrabble::Solution> Scrabble::FindBestMove(
         return Score(a, rack) < Score(b, rack);
       });
   if (best_column_solution != column_solutions.end()) {
+    best_column_solution->set_score(Score(*best_column_solution, rack));
     cout << "Best column word is: " << best_column_solution->word()
          << " at: " << best_column_solution->x() << ","
          << best_column_solution->y()
-         << " with a score of: " << Score(*best_column_solution, rack) << endl;
+         << " with a score of: " << best_column_solution->score() << endl;
     best_column_solution->Transpose();
     ret.push_back(*best_column_solution);
   }

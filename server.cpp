@@ -100,6 +100,7 @@ class CheaterServiceImpl final : public words::Cheater::Service {
                                Scrabble::Solution::Direction::ROW
                            ? words::Response::Solution::ROW
                            : words::Response::Solution::COLUMN);
+      s->set_score(solution.score());
     }
 
     return grpc::Status::OK;

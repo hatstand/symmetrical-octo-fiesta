@@ -22,6 +22,7 @@ message Response {
     Direction direction = 3;
 
     string word = 4;
+    int32 score = 5;
   }
 
   repeated Solution solution = 1;

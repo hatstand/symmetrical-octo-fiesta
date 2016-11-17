@@ -36,6 +36,9 @@ class Scrabble {
     int x() const { return x_; }
     int y() const { return y_; }
 
+    int score() const { return score_; }
+    void set_score(int score) { score_ = score; }
+
     const std::string& word() const { return word_; }
 
     enum class Direction {
@@ -53,6 +56,7 @@ class Scrabble {
    private:
     int x_;
     int y_;
+    int score_;
     std::string word_;
     Direction direction_;
   };
