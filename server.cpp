@@ -110,16 +110,19 @@ class CheaterServiceImpl final : public words::Cheater::Service {
 };
 
 int main(int argc, char** argv) {
+  gflags::ParseCommandLineFlags(&argc, &argv, true);
+
   KNearest nearest;
   nearest.Load("model");
 
   CheaterServiceImpl service(&nearest);
 
   grpc::ServerBuilder builder;
-  builder.AddListeningPort("0.0.0.0:" + to_string(FLAGS_port),
-                           grpc::InsecureServerCredentials());
+  string host = "0.0.0.0:" + to_string(FLAGS_port);
+  builder.AddListeningPort(host, grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   unique_ptr<grpc::Server> server(builder.BuildAndStart());
+  cout << "Listening on: " << host << endl;
   server->Wait();
 
   return 0;
