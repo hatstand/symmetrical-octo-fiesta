@@ -67,7 +67,7 @@ public class MainActivity extends Activity {
                       @Override
                       public void run() {
                         view.setText(response.toString());
-                        GridView grid = renderBoard(response.getBoard().getData());
+                        GridView grid = renderBoard(response);
                         layout.addView(grid);
                       }
                     });
@@ -84,7 +84,9 @@ public class MainActivity extends Activity {
     }
   }
 
-  private GridView renderBoard(final ByteString data) {
+  private GridView renderBoard(final Response response) {
+    final Response.Solution bestSolution = response.getSolution(0);
+    final ByteString data = response.getBoard().getData();
     GridView grid = new GridView(this);
     grid.setNumColumns(GRID_SIZE);
     grid.setAdapter(
@@ -119,15 +121,31 @@ public class MainActivity extends Activity {
             return 0;
           }
 
+          private boolean isSolution(int position) {
+            int x = position % GRID_SIZE;
+            int y = position / GRID_SIZE;
+            if (bestSolution.getDirection().equals(Response.Solution.Direction.ROW)) {
+              return x >= bestSolution.getX()
+                  && x < (bestSolution.getX() + bestSolution.getWord().length())
+                  && bestSolution.getY() == y;
+            } else {
+              return y >= bestSolution.getY()
+                  && y < (bestSolution.getY() + bestSolution.getWord().length())
+                  && bestSolution.getX() == x;
+            }
+          }
+
           @Override
           public View getView(int position, View convertView, ViewGroup parent) {
             String text = Character.toString((char) data.byteAt(position));
-            if (convertView != null) {
-              ((TextView) convertView).setText(text);
-              return convertView;
-            }
-            TextView view = new TextView(MainActivity.this);
+            TextView view =
+                convertView != null ? (TextView) convertView : new TextView(MainActivity.this);
             view.setText(text);
+            if (isSolution(position)) {
+              view.setTextColor(0xffff0000);
+            } else {
+              view.setTextColor(0xffffffff);
+            }
             return view;
           }
 
