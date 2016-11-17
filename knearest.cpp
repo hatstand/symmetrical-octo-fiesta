@@ -27,15 +27,18 @@ char KNearest::Recognise(const cv::Mat& image) const {
   cv::Mat results;
   cv::Mat neighbour_responses;
   cv::Mat distances;
-  float result = model_->findNearest(cv::InputArray(PrepareSample(image)), 2,
+  float result = model_->findNearest(cv::InputArray(PrepareSample(image)), 1,
                                      results, neighbour_responses, distances);
+  return static_cast<char>(result);
 
+  /*
   if (static_cast<int>(neighbour_responses.at<float>(0, 0) -
                        neighbour_responses.at<float>(0, 1)) == 0 &&
       distances.at<float>(0, 0) < kOcrMaxDistance) {
     return static_cast<char>(result);
   }
   return '?';
+  */
 }
 
 cv::Mat KNearest::PrepareSample(const cv::Mat& image) const {
