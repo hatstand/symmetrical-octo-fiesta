@@ -174,9 +174,9 @@ vector<Scrabble::Solution> Scrabble::FindBestMove(
          << " at: " << best_column_solution->x() << ","
          << best_column_solution->y()
          << " with a score of: " << Score(*best_column_solution, rack) << endl;
+    best_column_solution->Transpose();
+    ret.push_back(*best_column_solution);
   }
-  best_column_solution->Transpose();
-  ret.push_back(*best_column_solution);
   return ret;
 }
 
