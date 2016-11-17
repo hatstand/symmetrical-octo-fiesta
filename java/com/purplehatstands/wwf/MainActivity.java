@@ -108,7 +108,18 @@ public class MainActivity extends Activity {
 
           @Override
           public Object getItem(int position) {
-            return data.byteAt(position);
+            if (!isSolution(position)) {
+              return (char) data.byteAt(position);
+            }
+
+            int x = position % GRID_SIZE;
+            int y = position / GRID_SIZE;
+
+            if (bestSolution.getDirection().equals(Response.Solution.Direction.ROW)) {
+              return bestSolution.getWord().charAt(x - bestSolution.getX());
+            } else {
+              return bestSolution.getWord().charAt(y - bestSolution.getY());
+            }
           }
 
           @Override
@@ -137,7 +148,7 @@ public class MainActivity extends Activity {
 
           @Override
           public View getView(int position, View convertView, ViewGroup parent) {
-            String text = Character.toString((char) data.byteAt(position));
+            String text = Character.toString((char) getItem(position));
             TextView view =
                 convertView != null ? (TextView) convertView : new TextView(MainActivity.this);
             view.setText(text);
