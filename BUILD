@@ -57,6 +57,7 @@ cc_binary(
         ":knearest",
         ":scrabble",
         ":service",
+        "//external:gflags",
         "@opencv//:opencv_imgcodecs",
     ],
 )

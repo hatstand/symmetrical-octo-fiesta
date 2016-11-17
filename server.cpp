@@ -3,8 +3,8 @@
 #include <string>
 #include <vector>
 
+#include <gflags/gflags.h>
 #include <grpc++/grpc++.h>
-
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 
 #include "knearest.h"
@@ -14,8 +14,11 @@
 using std::cout;
 using std::endl;
 using std::string;
+using std::to_string;
 using std::vector;
 using std::unique_ptr;
+
+DEFINE_int32(port, 8080, "Port to start server on");
 
 namespace {
 
@@ -113,7 +116,8 @@ int main(int argc, char** argv) {
   CheaterServiceImpl service(&nearest);
 
   grpc::ServerBuilder builder;
-  builder.AddListeningPort("0.0.0.0:8080", grpc::InsecureServerCredentials());
+  builder.AddListeningPort("0.0.0.0:" + to_string(FLAGS_port),
+                           grpc::InsecureServerCredentials());
   builder.RegisterService(&service);
   unique_ptr<grpc::Server> server(builder.BuildAndStart());
   server->Wait();
