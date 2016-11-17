@@ -12,6 +12,7 @@ cc_library(
         "custom_hal.hpp",
         "opencl_kernels_core.hpp",
         "version_string.inc",
+        "opencv2/opencv_modules.hpp",
     ],
     hdrs = ["modules/core/include/opencv2/core/opencl/ocl_defs.hpp"],
     copts = [
@@ -58,6 +59,18 @@ genrule(
     name = "version_string",
     outs = ["version_string.inc"],
     cmd = "echo '\"OpenCV 3.1.0\"' > $@",
+)
+
+genrule(
+    name = "opencv_modules",
+    outs = ["opencv2/opencv_modules.hpp"],
+    cmd = """
+        echo '#define HAVE_OPENCV_CORE' >> $@
+        echo '#define HAVE_OPENCV_IMGCODECS' >> $@
+        echo '#define HAVE_OPENCV_IMGPROC' >> $@
+        echo '#define HAVE_OPENCV_ML' >> $@
+        echo '#define HAVE_OPENCV_VIDEOIO' >> $@
+    """,
 )
 
 cc_library(
