@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.util.Log;
+import android.widget.TextView;
 import com.google.common.io.ByteStreams;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
@@ -25,6 +26,10 @@ public class MainActivity extends Activity {
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
+    final TextView view = new TextView(this);
+    setContentView(view);
+    view.setText("Thinking...");
+
     Intent intent = getIntent();
 
     if (Intent.ACTION_SEND.equals(intent.getAction())) {
@@ -33,7 +38,7 @@ public class MainActivity extends Activity {
         InputStream stream = getContentResolver().openInputStream(imageUri);
         byte[] bytes = ByteStreams.toByteArray(stream);
         ManagedChannel channel =
-            ManagedChannelBuilder.forAddress("zaphod.purplehatstands.com", 8080)
+            ManagedChannelBuilder.forAddress("zaphod.purplehatstands.com", 32775)
                 .usePlaintext(true)
                 .build();
         CheaterGrpc.CheaterFutureStub stub = CheaterGrpc.newFutureStub(channel);
@@ -43,8 +48,15 @@ public class MainActivity extends Activity {
             response,
             new FutureCallback<Response>() {
               @Override
-              public void onSuccess(Response response) {
+              public void onSuccess(final Response response) {
                 Log.d(TAG, "Response:" + response);
+                runOnUiThread(
+                    new Runnable() {
+                      @Override
+                      public void run() {
+                        view.setText(response.toString());
+                      }
+                    });
               }
 
               @Override
