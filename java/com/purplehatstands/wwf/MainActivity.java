@@ -30,19 +30,28 @@ public class MainActivity extends Activity {
 
   private static final int GRID_SIZE = 15;
 
+  private LinearLayout layout;
+  private TextView view;
+
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
-    final LinearLayout layout = new LinearLayout(this);
+    layout = new LinearLayout(this);
     layout.setOrientation(LinearLayout.VERTICAL);
     setContentView(layout);
 
-    final TextView view = new TextView(this);
+    view = new TextView(this);
     layout.addView(view);
     view.setText("Thinking...");
+  }
 
+  @Override
+  public void onResume() {
+    super.onResume();
     Intent intent = getIntent();
+
+    Log.d(TAG, "Resuming: " + intent);
 
     if (Intent.ACTION_SEND.equals(intent.getAction())) {
       Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
@@ -84,8 +93,20 @@ public class MainActivity extends Activity {
     }
   }
 
+  private Response.Solution getBestSolution(Response response) {
+    Response.Solution ret = null;
+    int score = 0;
+    for (Response.Solution solution : response.getSolutionList()) {
+      if (solution.getScore() > score) {
+        score = solution.getScore();
+        ret = solution;
+      }
+    }
+    return ret;
+  }
+
   private GridView renderBoard(final Response response) {
-    final Response.Solution bestSolution = response.getSolution(0);
+    final Response.Solution bestSolution = getBestSolution(response);
     final ByteString data = response.getBoard().getData();
     GridView grid = new GridView(this);
     grid.setNumColumns(GRID_SIZE);
