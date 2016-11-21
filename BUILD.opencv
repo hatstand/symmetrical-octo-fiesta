@@ -59,8 +59,7 @@ genrule(
     name = "cvconfig_linux",
     outs = ["cvconfig_linux.h"],
     cmd = """
-      echo '#define BUILD_SHARED_LIBS' > $@
-      echo '#define HAVE_PNG' > $@
+      echo '#define HAVE_PNG' >> $@
     """,
 )
 
@@ -68,9 +67,8 @@ genrule(
     name = "cvconfig_android",
     outs = ["cvconfig_android.h"],
     cmd = """
-      echo '#define BUILD_SHARED_LIBS' > $@
-      echo '#define HAVE_PNG' > $@
-      echo '#define ANDROID' > $@
+      echo '#define HAVE_PNG' >> $@
+      echo '#define ANDROID' >> $@
     """,
 )
 

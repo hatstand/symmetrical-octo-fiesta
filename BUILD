@@ -1,3 +1,5 @@
+package(default_visibility = ["//visibility:public"])
+
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_compile")
 
@@ -12,6 +14,15 @@ cc_binary(
         "@opencv//:opencv_highgui",
         "@opencv//:opencv_imgproc",
         "@opencv//:opencv_ml",
+    ],
+)
+
+cc_library(
+    name = "recogniser",
+    srcs = ["recogniser.cpp"],
+    hdrs = ["recogniser.h"],
+    deps = [
+        ":knearest",
     ],
 )
 

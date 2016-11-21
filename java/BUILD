@@ -32,6 +32,7 @@ cc_library(
     ],
     deps = [
         "//:knearest",
+        "//:recogniser",
         "@opencv//:opencv_imgcodecs",
     ],
 )

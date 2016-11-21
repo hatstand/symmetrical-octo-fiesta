@@ -13,16 +13,10 @@ import android.widget.LinearLayout;
 import android.widget.ListAdapter;
 import android.widget.TextView;
 import com.google.common.io.ByteStreams;
-import com.google.common.util.concurrent.FutureCallback;
-import com.google.common.util.concurrent.Futures;
-import com.google.common.util.concurrent.ListenableFuture;
 import com.google.protobuf.ByteString;
-import io.grpc.ManagedChannel;
-import io.grpc.ManagedChannelBuilder;
 import java.io.IOException;
 import java.io.InputStream;
-import words.CheaterGrpc;
-import words.Service.Request;
+import java.nio.charset.StandardCharsets;
 import words.Service.Response;
 
 public class MainActivity extends Activity {
@@ -45,8 +39,6 @@ public class MainActivity extends Activity {
     view = new TextView(this);
     layout.addView(view);
     view.setText("Thinking...");
-
-    model = new Model(getAssets());
   }
 
   @Override
@@ -61,6 +53,8 @@ public class MainActivity extends Activity {
       try {
         InputStream stream = getContentResolver().openInputStream(imageUri);
         byte[] bytes = ByteStreams.toByteArray(stream);
+        view.setText(new String(recogniseGrid(bytes), StandardCharsets.UTF_8));
+        /*
         ManagedChannel channel =
             ManagedChannelBuilder.forAddress("zaphod.purplehatstands.com", 32776)
                 .usePlaintext(true)
@@ -90,10 +84,16 @@ public class MainActivity extends Activity {
                 Log.d(TAG, "Failed: " + throwable);
               }
             });
+          */
       } catch (IOException e) {
         e.printStackTrace();
       }
     }
+  }
+
+  private byte[] recogniseGrid(byte[] bytes) {
+    Grid grid = new Grid();
+    return grid.recogniseGrid(getAssets(), bytes);
   }
 
   private Response.Solution getBestSolution(Response response) {
