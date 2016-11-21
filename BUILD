@@ -21,6 +21,9 @@ cc_library(
         "scrabble.cpp",
         "scrabble.h",
     ],
+    copts = [
+        "--std=c++11",
+    ],
     deps = [
         "@dawgdic//:dawgdic",
     ],
@@ -31,6 +34,9 @@ cc_library(
     srcs = [
         "knearest.cpp",
         "knearest.h",
+    ],
+    copts = [
+        "--std=c++11",
     ],
     deps = [
         "@opencv//:opencv_core",

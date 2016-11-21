@@ -8,11 +8,11 @@ cc_library(
         "modules/core/include/**/*.hpp",
         "modules/core/include/**/*.h",
     ]) + [
-        "cvconfig.h",
         "custom_hal.hpp",
+        "cvconfig.h",
         "opencl_kernels_core.hpp",
-        "version_string.inc",
         "opencv2/opencv_modules.hpp",
+        "version_string.inc",
     ],
     hdrs = ["modules/core/include/opencv2/core/opencl/ocl_defs.hpp"],
     copts = [
@@ -25,8 +25,10 @@ cc_library(
     linkopts = [
         "-ldl",
         "-lz",
-        "-lpthread",
-    ],
+    ] + select({
+        ":arm": [],
+        "//conditions:default": ["-lpthread"],
+    }),
     visibility = ["//visibility:public"],
 )
 
@@ -42,10 +44,30 @@ genrule(
 
 genrule(
     name = "cvconfig",
+    srcs = select({
+        ":arm": ["cvconfig_android.h"],
+        "//conditions:default": ["cvconfig_linux.h"],
+    }),
     outs = ["cvconfig.h"],
+    cmd = "cp $< $@",
+)
+
+genrule(
+    name = "cvconfig_linux",
+    outs = ["cvconfig_linux.h"],
     cmd = """
       echo '#define BUILD_SHARED_LIBS' > $@
       echo '#define HAVE_PNG' > $@
+    """,
+)
+
+genrule(
+    name = "cvconfig_android",
+    outs = ["cvconfig_android.h"],
+    cmd = """
+      echo '#define BUILD_SHARED_LIBS' > $@
+      echo '#define HAVE_PNG' > $@
+      echo '#define ANDROID' > $@
     """,
 )
 
@@ -195,4 +217,11 @@ cc_library(
         ":opencv_core",
         ":opencv_imgcodecs",
     ],
+)
+
+config_setting(
+    name = "arm",
+    values = {
+        "cpu": "armeabi-v7a",
+    },
 )

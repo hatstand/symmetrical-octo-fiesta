@@ -38,7 +38,6 @@ new_git_repository(
 
 git_repository(
     name = "org_pubref_rules_protobuf",
-    #tag = "v0.7.0",
     commit = "404977c0290704aacca00fac8ca0ecaeda09a7cf",
     remote = "https://github.com/pubref/rules_protobuf",
 )
@@ -55,6 +54,12 @@ android_sdk_repository(
     api_level = 25,
     build_tools_version = "25.0.0",
     path = "/usr/local/google/home/johnmaguire/build/android-sdk-linux",
+)
+
+android_ndk_repository(
+    name = "androidndk",
+    api_level = 21,
+    path = "/usr/local/google/home/johnmaguire/build/android-ndk-r11c",
 )
 
 maven_jar(

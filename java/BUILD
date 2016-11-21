@@ -4,6 +4,8 @@ android_binary(
     manifest = "AndroidManifest.xml",
     deps = [
         ":protos",
+        "//:knearest",
+        "//:scrabble",
         "@org_pubref_rules_protobuf//java:grpc_compiletime_deps",
         "@org_pubref_rules_protobuf//java:netty_runtime_deps",
     ],
