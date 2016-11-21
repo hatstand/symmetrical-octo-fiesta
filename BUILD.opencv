@@ -17,6 +17,7 @@ cc_library(
     hdrs = ["modules/core/include/opencv2/core/opencl/ocl_defs.hpp"],
     copts = [
         "-D__OPENCV_BUILD",
+        "-Iexternal/zlib",
     ],
     includes = [
         ".",
@@ -24,12 +25,14 @@ cc_library(
     ],
     linkopts = [
         "-ldl",
-        "-lz",
     ] + select({
         ":arm": ["-llog"],
         "//conditions:default": ["-lpthread"],
     }),
     visibility = ["//visibility:public"],
+    deps = [
+        "@zlib//:zlib",
+    ],
 )
 
 genrule(
@@ -174,9 +177,12 @@ cc_library(
         "modules/imgcodecs/include/**/*.hpp",
         "modules/imgcodecs/include/**/*.h",
     ]),
-    copts = ["-D__OPENCV_BUILD"],
+    copts = [
+        "-D__OPENCV_BUILD",
+        "-Iexternal/libpng_http",
+        "-Iexternal/zlib",
+    ],
     includes = [
-        "../libpng_http",
         "modules/imgcodecs/include",
     ],
     visibility = ["//visibility:public"],
@@ -184,6 +190,7 @@ cc_library(
         ":opencv_core",
         ":opencv_imgproc",
         "@libpng_http//:libpng",
+        "@zlib//:zlib",
     ],
 )
 

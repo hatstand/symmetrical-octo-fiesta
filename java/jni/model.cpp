@@ -7,6 +7,8 @@
 #include <android/asset_manager_jni.h>
 #include <android/log.h>
 
+#include <opencv2/imgcodecs/imgcodecs.hpp>
+
 #include "knearest.h"
 
 using std::bind;
@@ -48,6 +50,19 @@ jlong loadModel(JNIEnv* env, jclass, jstring path_jni, jobject asset_manager) {
                         "Failed to load model");
   }
   return reinterpret_cast<jlong>(nearest);
+}
+
+jbyteArray recogniseGrid(JNIEnv* env, jclass, jbyteArray data) {
+  jbyte* bytes = env->GetByteArrayElements(data, nullptr);
+  jsize length = env->GetArrayLength(data);
+  vector<char> input(bytes, bytes + length);
+  cv::Mat image = cv::imdecode(cv::InputArray(input), 0);
+  env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
+  if (!image.data) {
+    __android_log_print(ANDROID_LOG_ERROR, "cheating_native",
+                        "Failed to load image");
+  }
+  return nullptr;
 }
 
 static const JNINativeMethod kMethods[] = {

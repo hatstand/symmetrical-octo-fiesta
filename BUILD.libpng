@@ -8,6 +8,9 @@ cc_library(
     ]) + ["pnglibconf.h"],
     hdrs = ["png.h"],
     visibility = ["//visibility:public"],
+    deps = [
+        "@zlib//:zlib",
+    ],
 )
 
 genrule(
