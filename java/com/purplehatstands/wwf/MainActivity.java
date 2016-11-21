@@ -26,7 +26,7 @@ public class MainActivity extends Activity {
 
   private LinearLayout layout;
   private TextView view;
-  private Model model;
+  private Grid grid;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -39,6 +39,8 @@ public class MainActivity extends Activity {
     view = new TextView(this);
     layout.addView(view);
     view.setText("Thinking...");
+
+    grid = new Grid(getAssets());
   }
 
   @Override
@@ -54,37 +56,10 @@ public class MainActivity extends Activity {
         InputStream stream = getContentResolver().openInputStream(imageUri);
         byte[] bytes = ByteStreams.toByteArray(stream);
         view.setText(new String(recogniseGrid(bytes), StandardCharsets.UTF_8));
-        /*
-        ManagedChannel channel =
-            ManagedChannelBuilder.forAddress("zaphod.purplehatstands.com", 32776)
-                .usePlaintext(true)
-                .build();
-        CheaterGrpc.CheaterFutureStub stub = CheaterGrpc.newFutureStub(channel);
-        Request request = Request.newBuilder().setImage(ByteString.copyFrom(bytes)).build();
-        ListenableFuture<Response> response = stub.findSolutions(request);
-        Futures.addCallback(
-            response,
-            new FutureCallback<Response>() {
-              @Override
-              public void onSuccess(final Response response) {
-                Log.d(TAG, "Response:" + response);
-                runOnUiThread(
-                    new Runnable() {
-                      @Override
-                      public void run() {
-                        view.setText(response.toString());
-                        GridView grid = renderBoard(response);
-                        layout.addView(grid);
-                      }
-                    });
-              }
 
-              @Override
-              public void onFailure(Throwable throwable) {
-                Log.d(TAG, "Failed: " + throwable);
-              }
-            });
-          */
+        byte[] grid = recogniseGrid(bytes);
+        byte[] rack = recogniseRack(bytes);
+        this.grid.solve(getAssets(), bytes);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -92,8 +67,11 @@ public class MainActivity extends Activity {
   }
 
   private byte[] recogniseGrid(byte[] bytes) {
-    Grid grid = new Grid();
     return grid.recogniseGrid(getAssets(), bytes);
+  }
+
+  private byte[] recogniseRack(byte[] bytes) {
+    return grid.recogniseRack(getAssets(), bytes);
   }
 
   private Response.Solution getBestSolution(Response response) {

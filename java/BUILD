@@ -33,13 +33,24 @@ cc_library(
     deps = [
         "//:knearest",
         "//:recogniser",
+        "//:scrabble",
         "@opencv//:opencv_imgcodecs",
     ],
 )
 
 genrule(
     name = "assets",
-    srcs = ["//:model"],
-    outs = ["assets/model"],
-    cmd = "cp $< $@",
+    srcs = [
+        "//:model",
+        "//:word_list",
+    ],
+    outs = [
+        "assets/model",
+        "assets/word_list",
+    ],
+    cmd = """
+        for i in $(SRCS); do
+          cp $$i $(@D)/assets/
+        done
+    """,
 )

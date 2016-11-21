@@ -12,6 +12,7 @@
 
 #include "knearest.h"
 #include "recogniser.h"
+#include "scrabble.h"
 
 using std::bind;
 using std::copy;
@@ -48,25 +49,7 @@ vector<char> LoadAsset(AAssetManager* asset_manager, const std::string& path) {
   return buffer;
 }
 
-jlong LoadModel(JNIEnv* env, jclass, jstring path_jni, jobject asset_manager) {
-  const string path = JStringToStdString(env, path_jni);
-  AAssetManager* assets = AAssetManager_fromJava(env, asset_manager);
-
-  vector<char> buffer = LoadAsset(assets, path);
-
-  KNearest* nearest = new KNearest;
-  cv::String data(buffer.data(), buffer.size());
-  if (!nearest->LoadFromString(data)) {
-    __android_log_print(ANDROID_LOG_ERROR, "cheating_native",
-                        "Failed to load model");
-  }
-  __android_log_print(ANDROID_LOG_INFO, kTag, "Loaded model of size: %d",
-                      data.size());
-  return reinterpret_cast<jlong>(nearest);
-}
-
-jbyteArray RecogniseGrid(JNIEnv* env, jclass, jobject asset_manager,
-                         jstring path_jni, jbyteArray data) {
+cv::Mat DecodeImage(JNIEnv* env, jbyteArray data) {
   // Decode image into opencv readable form.
   jbyte* bytes = env->GetByteArrayElements(data, nullptr);
   jsize length = env->GetArrayLength(data);
@@ -78,25 +61,36 @@ jbyteArray RecogniseGrid(JNIEnv* env, jclass, jobject asset_manager,
   env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
   if (!image.data) {
     __android_log_print(ANDROID_LOG_ERROR, kTag, "Failed to load image");
-    return nullptr;
+  } else {
+    __android_log_print(ANDROID_LOG_INFO, kTag,
+                        "Successfully loaded image %dx%d", image.size().width,
+                        image.size().height);
   }
-  __android_log_print(ANDROID_LOG_INFO, kTag, "Successfully loaded image %dx%d",
-                      image.size().width, image.size().height);
+  return image;
+}
 
+KNearest* LoadModel(JNIEnv* env, jobject asset_manager, jstring path_jni) {
   // Load K-Nearest-Neighbours model.
   const string path = JStringToStdString(env, path_jni);
   AAssetManager* assets = AAssetManager_fromJava(env, asset_manager);
   vector<char> model_data = LoadAsset(assets, path);
   cv::String cv_data(model_data.data(), model_data.size());
-  KNearest nearest;
-  if (!nearest.LoadFromString(cv_data)) {
+  KNearest* nearest = new KNearest;
+  if (!nearest->LoadFromString(cv_data)) {
     __android_log_print(ANDROID_LOG_ERROR, "cheating_native",
                         "Failed to load model");
     return nullptr;
   }
   __android_log_print(ANDROID_LOG_INFO, kTag, "Loaded model of size %d",
                       cv_data.size());
-  Recogniser recogniser(nearest);
+  return nearest;
+}
+
+jbyteArray RecogniseGrid(JNIEnv* env, jclass, jobject asset_manager,
+                         jstring path_jni, jbyteArray data) {
+  unique_ptr<KNearest> nearest(LoadModel(env, asset_manager, path_jni));
+  cv::Mat image = DecodeImage(env, data);
+  Recogniser recogniser(*nearest);
   __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising grid");
   vector<char> grid = recogniser.RecogniseGrid(image);
 
@@ -107,14 +101,61 @@ jbyteArray RecogniseGrid(JNIEnv* env, jclass, jobject asset_manager,
   return ret;
 }
 
-static const JNINativeMethod kModelMethods[] = {
-    {"loadModel", "(Ljava/lang/String;Landroid/content/res/AssetManager;)J",
-     reinterpret_cast<void*>(&LoadModel)}};
+jbyteArray RecogniseRack(JNIEnv* env, jclass, jobject asset_manager,
+                         jstring path_jni, jbyteArray data) {
+  unique_ptr<KNearest> nearest(LoadModel(env, asset_manager, path_jni));
+  cv::Mat image = DecodeImage(env, data);
+  Recogniser recogniser(*nearest);
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising rack");
+  vector<char> rack = recogniser.RecogniseRack(image);
+
+  jbyteArray ret = env->NewByteArray(rack.size());
+  jbyte* ret_data = env->GetByteArrayElements(ret, nullptr);
+  copy(rack.begin(), rack.end(), ret_data);
+  env->ReleaseByteArrayElements(ret, ret_data, 0);
+  return ret;
+}
+
+vector<string> LoadWords(JNIEnv* env, jobjectArray words) {
+  vector<string> ret;
+  const int length = env->GetArrayLength(words);
+  for (jsize i = 0; i < length; ++i) {
+    jstring s = (jstring)env->GetObjectArrayElement(words, i);
+    ret.push_back(JStringToStdString(env, s));
+    env->DeleteLocalRef(s);
+  }
+  return ret;
+}
+
+void Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
+           jbyteArray data, jobjectArray words) {
+  unique_ptr<KNearest> nearest(LoadModel(env, asset_manager, path_jni));
+  cv::Mat image = DecodeImage(env, data);
+  Recogniser recogniser(*nearest);
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising rack");
+  vector<char> grid = recogniser.RecogniseGrid(image);
+  vector<char> rack = recogniser.RecogniseRack(image);
+
+  Scrabble scrabble(grid, LoadWords(env, words));
+  vector<Scrabble::Solution> solutions = scrabble.FindBestMove(rack);
+  for (const auto& solution : solutions) {
+    __android_log_print(ANDROID_LOG_INFO, kTag, "Play %s at (%d,%d)",
+                        solution.word().c_str(), solution.x(), solution.y());
+  }
+}
 
 static const JNINativeMethod kGridMethods[] = {
     {"recogniseGrid",
      "(Landroid/content/res/AssetManager;Ljava/lang/String;[B)[B",
-     reinterpret_cast<void*>(&RecogniseGrid)}};
+     reinterpret_cast<void*>(&RecogniseGrid)},
+    {"recogniseRack",
+     "(Landroid/content/res/AssetManager;Ljava/lang/String;[B)[B",
+     reinterpret_cast<void*>(&RecogniseRack)},
+    {"solve",
+     "(Landroid/content/res/AssetManager;Ljava/lang/String;[B[Ljava/lang/"
+     "String;)V",
+     reinterpret_cast<void*>(&Solve)},
+};
 
 }  // namespace
 
@@ -123,10 +164,6 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
   if (vm->GetEnv(reinterpret_cast<void**>(&env), JNI_VERSION_1_6) != JNI_OK) {
     return -1;
   }
-
-  jclass clazz = env->FindClass("com/purplehatstands/wwf/Model");
-  env->RegisterNatives(clazz, kModelMethods,
-                       extent<decltype(kModelMethods)>::value);
 
   jclass grid_clazz = env->FindClass("com/purplehatstands/wwf/Grid");
   env->RegisterNatives(grid_clazz, kGridMethods,

@@ -25,6 +25,8 @@ class Guide;
 class Scrabble {
  public:
   explicit Scrabble(const std::vector<char>& board);
+  Scrabble(const std::vector<char>& board,
+           const std::vector<std::string> words);
   ~Scrabble();
 
   void PrintBoard() const;

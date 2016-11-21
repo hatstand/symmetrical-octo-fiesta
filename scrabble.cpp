@@ -42,20 +42,28 @@ static map<char, int> kScoreMap = {
     {'v', 5}, {'w', 4}, {'x', 8},  {'y', 3}, {'z', 10},
 };
 
-dawgdic::Dawg* BuildDawg() {
+dawgdic::Dawg* BuildDawg(const vector<string>& words) {
   dawgdic::DawgBuilder builder;
+  for (const string& word : words) {
+    builder.Insert(word.c_str());
+  }
+  dawgdic::Dawg* dawg = new dawgdic::Dawg;
+  builder.Finish(dawg);
+  return dawg;
+}
+
+dawgdic::Dawg* BuildDawg() {
+  vector<string> lines;
   std::string line;
   std::ifstream infile("/usr/share/dict/words");
   while (std::getline(infile, line)) {
     bool only_lower = std::all_of(line.begin(), line.end(),
                                   [](char c) { return c >= 'a' && c <= 'z'; });
     if (only_lower) {
-      builder.Insert(line.c_str());
+      lines.push_back(line);
     }
   }
-  dawgdic::Dawg* dawg = new dawgdic::Dawg;
-  builder.Finish(dawg);
-  return dawg;
+  return BuildDawg(lines);
 }
 
 dawgdic::Dictionary* BuildDictionary(const dawgdic::Dawg& dawg) {
@@ -119,6 +127,12 @@ vector<char> Transpose(const vector<char> board) {
 Scrabble::Scrabble(const vector<char>& board)
     : board_(board),
       dawg_(BuildDawg()),
+      dictionary_(BuildDictionary(*dawg_)),
+      guide_(BuildGuide(*dawg_, *dictionary_)) {}
+
+Scrabble::Scrabble(const vector<char>& board, const vector<string> words)
+    : board_(board),
+      dawg_(BuildDawg(words)),
       dictionary_(BuildDictionary(*dawg_)),
       guide_(BuildGuide(*dawg_, *dictionary_)) {}
 

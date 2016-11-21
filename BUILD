@@ -108,3 +108,5 @@ genrule(
     cmd = "$(location :train_model) --output $@ $(SRCS)",
     tools = [":train_model"],
 )
+
+exports_files(["word_list"])
