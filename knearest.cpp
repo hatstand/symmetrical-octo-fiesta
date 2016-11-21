@@ -51,9 +51,18 @@ cv::Mat KNearest::PrepareSample(const cv::Mat& image) const {
 
 void KNearest::Save(const std::string& path) { model_->save(path); }
 
-void KNearest::Load(const std::string& path) {
+bool KNearest::Load(const std::string& path) {
   model_ = cv::ml::KNearest::load<cv::ml::KNearest>(path);
   if (!model_) {
     cerr << "Failed to load KNearest model" << endl;
   }
+  return model_;
+}
+
+bool KNearest::LoadFromString(const std::string& model) {
+  model_ = cv::ml::KNearest::loadFromString<cv::ml::KNearest>(model);
+  if (!model_) {
+    cerr << "Failed to load KNearest model" << endl;
+  }
+  return model_;
 }

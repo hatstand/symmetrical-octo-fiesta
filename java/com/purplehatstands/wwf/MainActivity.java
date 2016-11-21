@@ -32,6 +32,7 @@ public class MainActivity extends Activity {
 
   private LinearLayout layout;
   private TextView view;
+  private Model model;
 
   @Override
   public void onCreate(Bundle savedInstanceState) {
@@ -44,6 +45,8 @@ public class MainActivity extends Activity {
     view = new TextView(this);
     layout.addView(view);
     view.setText("Thinking...");
+
+    model = new Model(getAssets());
   }
 
   @Override

@@ -12,7 +12,8 @@ class KNearest {
   void Train();
   char Recognise(const cv::Mat& image) const;
   void Save(const std::string& path);
-  void Load(const std::string& path);
+  bool Load(const std::string& path);
+  bool LoadFromString(const std::string& model);
 
  private:
   cv::Mat PrepareSample(const cv::Mat& image) const;

@@ -26,7 +26,7 @@ cc_library(
         "-ldl",
         "-lz",
     ] + select({
-        ":arm": [],
+        ":arm": ["-llog"],
         "//conditions:default": ["-lpthread"],
     }),
     visibility = ["//visibility:public"],
