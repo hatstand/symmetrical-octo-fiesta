@@ -36,13 +36,6 @@ new_git_repository(
     tag = "3.1.0",
 )
 
-new_git_repository(
-    name = "zlib",
-    build_file = "BUILD.zlib",
-    remote = "https://github.com/madler/zlib",
-    tag = "v1.2.8",
-)
-
 git_repository(
     name = "org_pubref_rules_protobuf",
     commit = "404977c0290704aacca00fac8ca0ecaeda09a7cf",

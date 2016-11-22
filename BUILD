@@ -72,6 +72,7 @@ cc_binary(
     data = ["model"],
     deps = [
         ":knearest",
+        ":recogniser",
         ":scrabble",
         ":service",
         "//external:gflags",

@@ -31,7 +31,7 @@ cc_library(
     }),
     visibility = ["//visibility:public"],
     deps = [
-        "@zlib//:zlib",
+        "//external:zlib",
     ],
 )
 
@@ -187,8 +187,8 @@ cc_library(
     deps = [
         ":opencv_core",
         ":opencv_imgproc",
+        "//external:zlib",
         "@libpng_http//:libpng",
-        "@zlib//:zlib",
     ],
 )
 

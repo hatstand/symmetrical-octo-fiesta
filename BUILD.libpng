@@ -9,7 +9,7 @@ cc_library(
     hdrs = ["png.h"],
     visibility = ["//visibility:public"],
     deps = [
-        "@zlib//:zlib",
+        "//external:zlib",
     ],
 )
 
