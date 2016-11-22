@@ -127,8 +127,8 @@ vector<string> LoadWords(JNIEnv* env, jobjectArray words) {
   return ret;
 }
 
-void Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
-           jbyteArray data, jobjectArray words) {
+jstring Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
+              jbyteArray data, jobjectArray words) {
   unique_ptr<KNearest> nearest(LoadModel(env, asset_manager, path_jni));
   cv::Mat image = DecodeImage(env, data);
   Recogniser recogniser(*nearest);
@@ -142,6 +142,16 @@ void Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
     __android_log_print(ANDROID_LOG_INFO, kTag, "Play %s at (%d,%d)",
                         solution.word().c_str(), solution.x(), solution.y());
   }
+
+  static const char* kFormatString = "You should play %s at (%d,%d)";
+  size_t size = snprintf(nullptr, 0, kFormatString, solutions[0].word().c_str(),
+                         solutions[0].x(), solutions[0].y());
+  unique_ptr<char[]> buffer(new char[size]);
+  snprintf(buffer.get(), size, kFormatString, solutions[0].word().c_str(),
+           solutions[0].x(), solutions[0].y());
+
+  jstring ret = env->NewStringUTF(&buffer[0]);
+  return ret;
 }
 
 static const JNINativeMethod kGridMethods[] = {
@@ -153,7 +163,7 @@ static const JNINativeMethod kGridMethods[] = {
      reinterpret_cast<void*>(&RecogniseRack)},
     {"solve",
      "(Landroid/content/res/AssetManager;Ljava/lang/String;[B[Ljava/lang/"
-     "String;)V",
+     "String;)Ljava/lang/String;",
      reinterpret_cast<void*>(&Solve)},
 };
 

@@ -14,7 +14,7 @@ class Grid {
   private static final String WORD_LIST_PATH = "word_list";
 
   static {
-    System.loadLibrary("foo");
+    System.loadLibrary("cheating");
   }
 
   private String[] words = null;
@@ -42,14 +42,14 @@ class Grid {
     return recogniseRack(assetManager, ASSET_PATH, pngData);
   }
 
-  void solve(AssetManager assetManager, byte[] pngData) {
-    solve(assetManager, ASSET_PATH, pngData, words);
+  String solve(AssetManager assetManager, byte[] pngData) {
+    return solve(assetManager, ASSET_PATH, pngData, words);
   }
 
   private native byte[] recogniseGrid(AssetManager assetManager, String assetPath, byte[] pngData);
 
   private native byte[] recogniseRack(AssetManager assetManager, String assetPath, byte[] pngData);
 
-  private native void solve(
+  private native String solve(
       AssetManager assetManager, String assetPath, byte[] pngData, String[] words);
 }

@@ -16,7 +16,6 @@ import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.charset.StandardCharsets;
 import words.Service.Response;
 
 public class MainActivity extends Activity {
@@ -55,11 +54,8 @@ public class MainActivity extends Activity {
       try {
         InputStream stream = getContentResolver().openInputStream(imageUri);
         byte[] bytes = ByteStreams.toByteArray(stream);
-        view.setText(new String(recogniseGrid(bytes), StandardCharsets.UTF_8));
-
-        byte[] grid = recogniseGrid(bytes);
-        byte[] rack = recogniseRack(bytes);
-        this.grid.solve(getAssets(), bytes);
+        String advice = grid.solve(getAssets(), bytes);
+        view.setText(advice);
       } catch (IOException e) {
         e.printStackTrace();
       }

@@ -1,5 +1,5 @@
 android_binary(
-    name = "foo",
+    name = "cheating",
     srcs = glob(["**/*.java"]),
     assets = [":assets"],
     assets_dir = "assets",
