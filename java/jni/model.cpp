@@ -146,8 +146,8 @@ jstring Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
   static const char* kFormatString = "You should play %s at (%d,%d)";
   size_t size = snprintf(nullptr, 0, kFormatString, solutions[0].word().c_str(),
                          solutions[0].x(), solutions[0].y());
-  unique_ptr<char[]> buffer(new char[size]);
-  snprintf(buffer.get(), size, kFormatString, solutions[0].word().c_str(),
+  unique_ptr<char[]> buffer(new char[size + 1]);
+  snprintf(buffer.get(), size + 1, kFormatString, solutions[0].word().c_str(),
            solutions[0].x(), solutions[0].y());
 
   jstring ret = env->NewStringUTF(&buffer[0]);
