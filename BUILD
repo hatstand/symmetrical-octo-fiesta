@@ -6,7 +6,7 @@ load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_compile")
 cc_binary(
     name = "words",
     srcs = ["words.cpp"],
-    data = ["model"],
+    data = ["//data:model"],
     deps = [
         ":knearest",
         ":scrabble",
@@ -69,7 +69,7 @@ cc_binary(
 cc_binary(
     name = "server",
     srcs = ["server.cpp"],
-    data = ["model"],
+    data = ["//data:model"],
     deps = [
         ":knearest",
         ":recogniser",
@@ -101,13 +101,3 @@ java_proto_compile(
     visibility = ["//visibility:public"],
     with_grpc = True,
 )
-
-genrule(
-    name = "gen_model",
-    srcs = glob(["training/**/*.png"]),
-    outs = ["model"],
-    cmd = "$(location :train_model) --output $@ $(SRCS)",
-    tools = [":train_model"],
-)
-
-exports_files(["word_list"])

@@ -41,8 +41,8 @@ cc_library(
 genrule(
     name = "assets",
     srcs = [
-        "//:model",
-        "//:word_list",
+        "//data:model",
+        "//data:word_list",
     ],
     outs = [
         "assets/model",
