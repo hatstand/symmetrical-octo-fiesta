@@ -187,8 +187,8 @@ cc_library(
     deps = [
         ":opencv_core",
         ":opencv_imgproc",
+        "//external:libpng",
         "//external:zlib",
-        "@libpng_http//:libpng",
     ],
 )
 
