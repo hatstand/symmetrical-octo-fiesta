@@ -6,12 +6,15 @@
 
 using std::cerr;
 using std::endl;
+using std::function;
 
 namespace {
 static const int kOcrMaxDistance = 60000;
 }
 
-KNearest::KNearest() : model_(cv::ml::KNearest::create()) {}
+KNearest::KNearest(function<char(const cv::Mat&)> recognise_callback)
+    : model_(cv::ml::KNearest::create()),
+      recognise_callback_(recognise_callback) {}
 
 void KNearest::Learn(const cv::Mat& image, char c) {
   responses_.push_back(cv::Mat(1, 1, CV_32F, (float)c));
@@ -29,16 +32,21 @@ char KNearest::Recognise(const cv::Mat& image) const {
   cv::Mat distances;
   float result = model_->findNearest(cv::InputArray(PrepareSample(image)), 1,
                                      results, neighbour_responses, distances);
-  return static_cast<char>(result);
 
-  /*
+  if (!recognise_callback_) {
+    // Just assume it's correct if there's no one to ask.
+    return static_cast<char>(result);
+  }
+
   if (static_cast<int>(neighbour_responses.at<float>(0, 0) -
                        neighbour_responses.at<float>(0, 1)) == 0 &&
       distances.at<float>(0, 0) < kOcrMaxDistance) {
+    // Pretty certain about this result so just return it.
     return static_cast<char>(result);
   }
-  return '?';
-  */
+
+  // A bit fuzzy about this answer so ask someone.
+  return recognise_callback_(image);
 }
 
 cv::Mat KNearest::PrepareSample(const cv::Mat& image) const {

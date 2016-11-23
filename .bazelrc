@@ -1,0 +1,1 @@
+build --cxxopt="--std=c++11" --android_compiler=clang3.8

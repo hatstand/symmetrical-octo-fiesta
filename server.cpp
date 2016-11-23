@@ -68,7 +68,7 @@ int main(int argc, char** argv) {
   gflags::ParseCommandLineFlags(&argc, &argv, true);
 
   KNearest nearest;
-  nearest.Load("model");
+  nearest.Load("data/model");
 
   CheaterServiceImpl service(&nearest);
 

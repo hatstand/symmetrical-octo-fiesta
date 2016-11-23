@@ -10,6 +10,7 @@
 
 #include <opencv2/imgcodecs/imgcodecs.hpp>
 
+#include "java/com/purplehatstands/wwf/jni/images.h"
 #include "knearest.h"
 #include "recogniser.h"
 #include "scrabble.h"
@@ -47,26 +48,6 @@ vector<char> LoadAsset(AAssetManager* asset_manager, const std::string& path) {
                         "Failed to read asset");
   }
   return buffer;
-}
-
-cv::Mat DecodeImage(JNIEnv* env, jbyteArray data) {
-  // Decode image into opencv readable form.
-  jbyte* bytes = env->GetByteArrayElements(data, nullptr);
-  jsize length = env->GetArrayLength(data);
-  vector<char> input(bytes, bytes + length);
-  __android_log_print(ANDROID_LOG_INFO, kTag,
-                      "Trying to decode image of size %d/%d", length,
-                      input.size());
-  cv::Mat image = cv::imdecode(input, 0);
-  env->ReleaseByteArrayElements(data, bytes, JNI_ABORT);
-  if (!image.data) {
-    __android_log_print(ANDROID_LOG_ERROR, kTag, "Failed to load image");
-  } else {
-    __android_log_print(ANDROID_LOG_INFO, kTag,
-                        "Successfully loaded image %dx%d", image.size().width,
-                        image.size().height);
-  }
-  return image;
 }
 
 KNearest* LoadModel(JNIEnv* env, jobject asset_manager, jstring path_jni) {
@@ -127,6 +108,15 @@ vector<string> LoadWords(JNIEnv* env, jobjectArray words) {
   return ret;
 }
 
+template <typename... Args>
+string Format(const std::string& format_string, Args... args) {
+  size_t size = snprintf(nullptr, 0, format_string.c_str(), args...);
+  unique_ptr<char[]> buffer(new char[size + 1]);
+  snprintf(buffer.get(), size + 1, format_string.c_str(), args...);
+  string ret(buffer.get(), size);
+  return ret;
+}
+
 jstring Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
               jbyteArray data, jobjectArray words) {
   unique_ptr<KNearest> nearest(LoadModel(env, asset_manager, path_jni));
@@ -138,20 +128,18 @@ jstring Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
 
   Scrabble scrabble(grid, LoadWords(env, words));
   vector<Scrabble::Solution> solutions = scrabble.FindBestMove(rack);
+  string ret;
   for (const auto& solution : solutions) {
     __android_log_print(ANDROID_LOG_INFO, kTag, "Play %s at (%d,%d)",
                         solution.word().c_str(), solution.x(), solution.y());
+
+    ret += Format("%s at (%d, %d) for %d points", solution.word().c_str(),
+                  solution.x(), solution.y(), solution.score());
+    ret += "\n";
   }
 
-  static const char* kFormatString = "You should play %s at (%d,%d)";
-  size_t size = snprintf(nullptr, 0, kFormatString, solutions[0].word().c_str(),
-                         solutions[0].x(), solutions[0].y());
-  unique_ptr<char[]> buffer(new char[size + 1]);
-  snprintf(buffer.get(), size + 1, kFormatString, solutions[0].word().c_str(),
-           solutions[0].x(), solutions[0].y());
-
-  jstring ret = env->NewStringUTF(&buffer[0]);
-  return ret;
+  jstring jret = env->NewStringUTF(ret.c_str());
+  return jret;
 }
 
 static const JNINativeMethod kGridMethods[] = {
