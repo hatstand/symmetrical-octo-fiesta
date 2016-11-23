@@ -26,6 +26,21 @@ cc_library(
     ],
 )
 
+cc_test(
+    name = "recogniser_test",
+    srcs = ["recogniser_test.cpp"],
+    data = [
+        "testdata/words.png",
+        "//data:model",
+    ],
+    deps = [
+        ":knearest",
+        ":recogniser",
+        "@gtest//:gtest",
+        "@opencv//:opencv_imgcodecs",
+    ],
+)
+
 cc_library(
     name = "scrabble",
     srcs = [

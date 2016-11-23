@@ -2,10 +2,16 @@ package(default_visibility = ["//visibility:private"])
 
 cc_library(
     name = "libpng",
-    srcs = glob([
-        "*.c",
-        "*.h",
-    ]) + ["pnglibconf.h"],
+    srcs = glob(
+        [
+            "*.c",
+            "*.h",
+        ],
+        exclude = [
+            "pngtest.c",
+            "example.c",
+        ],
+    ) + ["pnglibconf.h"],
     hdrs = ["png.h"],
     visibility = ["//visibility:public"],
     deps = [
