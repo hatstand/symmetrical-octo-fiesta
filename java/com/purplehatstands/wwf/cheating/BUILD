@@ -4,11 +4,31 @@ android_binary(
     assets_dir = "assets",
     manifest = "AndroidManifest.xml",
     deps = [
+        ":MainActivity",
         ":jni",
         ":protos",
         "//:knearest",
         "//:scrabble",
-        "//java/com/purplehatstands/wwf:MainActivity",
+    ],
+)
+
+android_library(
+    name = "Grid",
+    srcs = ["Grid.java"],
+    deps = [
+        "@com_google_guava_guava//jar",
+    ],
+)
+
+android_library(
+    name = "MainActivity",
+    srcs = ["MainActivity.java"],
+    visibility = ["//java:__pkg__"],
+    deps = [
+        ":Grid",
+        ":protos",
+        "@org_pubref_rules_protobuf//java:grpc_compiletime_deps",
+        "@org_pubref_rules_protobuf//java:netty_runtime_deps",
     ],
 )
 
@@ -24,8 +44,7 @@ android_library(
 
 cc_library(
     name = "jni",
-    srcs = glob(["jni/**/*.cpp"]),
-    copts = ["--std=c++11"],
+    srcs = glob(["*.cpp"]),
     linkopts = [
         "-landroid",
     ],

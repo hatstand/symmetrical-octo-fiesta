@@ -1,4 +1,4 @@
-package com.purplehatstands.wwf;
+package com.purplehatstands.wwf.cheating;
 
 import android.app.Activity;
 import android.content.Intent;
