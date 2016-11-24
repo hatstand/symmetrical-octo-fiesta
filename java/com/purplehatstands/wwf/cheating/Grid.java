@@ -10,7 +10,7 @@ import java.io.InputStreamReader;
 /** TODO: http://go/java-style#javadoc */
 class Grid {
 
-  private static final String ASSET_PATH = "model";
+  private static final String MODEL_PATH = "model";
   private static final String WORD_LIST_PATH = "word_list";
 
   static {
@@ -35,15 +35,15 @@ class Grid {
   }
 
   byte[] recogniseGrid(AssetManager assetManager, byte[] pngData) {
-    return recogniseGrid(assetManager, ASSET_PATH, pngData);
+    return recogniseGrid(assetManager, MODEL_PATH, pngData);
   }
 
   byte[] recogniseRack(AssetManager assetManager, byte[] pngData) {
-    return recogniseRack(assetManager, ASSET_PATH, pngData);
+    return recogniseRack(assetManager, MODEL_PATH, pngData);
   }
 
   String solve(AssetManager assetManager, byte[] pngData) {
-    return solve(assetManager, ASSET_PATH, pngData, words);
+    return solve(assetManager, MODEL_PATH, pngData, words);
   }
 
   private native byte[] recogniseGrid(AssetManager assetManager, String assetPath, byte[] pngData);

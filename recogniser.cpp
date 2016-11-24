@@ -14,7 +14,7 @@ char Recogniser::Recognise(const cv::Mat& image) const {
 }
 
 vector<char> Recogniser::RecogniseGrid(const cv::Mat& image) const {
-  cv::Mat grid = image;
+  cv::Mat grid = image.clone();
   cv::bitwise_not(grid, grid);
   const int grid_start = grid.size().height / 4;
   const int square_width = grid.size().width / kGridSize;
@@ -29,7 +29,7 @@ vector<char> Recogniser::RecogniseGrid(const cv::Mat& image) const {
       cv::Point top_left(x, y);
       cv::Point bottom_right(x + square_width, y + square_width);
 
-      cv::Mat square(image, cv::Rect(top_left, bottom_right));
+      cv::Mat square(grid, cv::Rect(top_left, bottom_right));
       ret[i + kGridSize * j] = Recognise(square);
     }
   }

@@ -15,7 +15,8 @@ namespace {
 
 string GetDataPath(const std::string& path) {
   string test_src_dir = getenv("TEST_SRCDIR");
-  string ret = test_src_dir + "/__main__/" + path;
+  string test_workspace = getenv("TEST_WORKSPACE");
+  string ret = test_src_dir + "/" + test_workspace + "/" + path;
   return ret;
 }
 
@@ -29,8 +30,9 @@ TEST_F(RecogniserTest, RecognisesGrid) {
   ASSERT_TRUE(nearest.Load(GetDataPath("data/model")));
   Recogniser recogniser(nearest);
   cv::Mat image = DecodeImage(GetDataPath("testdata/words2.png"));
-  cv::bitwise_not(image, image);
   ASSERT_FALSE(image.data == nullptr);
+  EXPECT_EQ(1440, image.size().width);
+  EXPECT_EQ(2560, image.size().height);
   vector<char> grid = recogniser.RecogniseGrid(image);
 }
 
