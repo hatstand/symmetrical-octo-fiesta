@@ -28,10 +28,10 @@ TEST_F(RecogniserTest, RecognisesGrid) {
   KNearest nearest;
   ASSERT_TRUE(nearest.Load(GetDataPath("data/model")));
   Recogniser recogniser(nearest);
-  cv::Mat image = DecodeImage(GetDataPath("testdata/words.png"));
+  cv::Mat image = DecodeImage(GetDataPath("testdata/words2.png"));
+  cv::bitwise_not(image, image);
   ASSERT_FALSE(image.data == nullptr);
-  vector<char> grid =
-      recogniser.RecogniseGrid(DecodeImage(GetDataPath("testdata/words.png")));
+  vector<char> grid = recogniser.RecogniseGrid(image);
 }
 
 }  // namespace

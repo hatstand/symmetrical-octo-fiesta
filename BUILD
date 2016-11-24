@@ -9,11 +9,9 @@ cc_binary(
     data = ["//data:model"],
     deps = [
         ":knearest",
+        ":recogniser",
         ":scrabble",
-        "@opencv//:opencv_core",
-        "@opencv//:opencv_highgui",
-        "@opencv//:opencv_imgproc",
-        "@opencv//:opencv_ml",
+        "@opencv//:opencv_imgcodecs",
     ],
 )
 
@@ -30,7 +28,7 @@ cc_test(
     name = "recogniser_test",
     srcs = ["recogniser_test.cpp"],
     data = [
-        "testdata/words.png",
+        "testdata/words2.png",
         "//data:model",
     ],
     deps = [
