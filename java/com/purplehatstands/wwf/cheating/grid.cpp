@@ -161,6 +161,9 @@ jbyteArray Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
     s->set_score(solution.score());
   }
 
+  response.mutable_board()->set_data(grid.data(), grid.size());
+  response.mutable_rack()->set_data(rack.data(), rack.size());
+
   __android_log_print(ANDROID_LOG_INFO, kTag, "Finished: %s",
                       response.DebugString().c_str());
 

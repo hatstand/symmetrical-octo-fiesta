@@ -25,6 +25,7 @@ public class MainActivity extends Activity {
 
   private LinearLayout layout;
   private TextView view;
+  private GridView gridView;
   private Grid grid;
 
   @Override
@@ -38,6 +39,9 @@ public class MainActivity extends Activity {
     view = new TextView(this);
     layout.addView(view);
     view.setText("Thinking...");
+
+    gridView = new GridView(this);
+    layout.addView(gridView);
 
     grid = new Grid(getAssets());
   }
@@ -56,6 +60,7 @@ public class MainActivity extends Activity {
         byte[] bytes = ByteStreams.toByteArray(stream);
         Response response = grid.solve(getAssets(), bytes);
         view.setText(response.toString());
+        renderBoard(response);
       } catch (IOException e) {
         e.printStackTrace();
       }
@@ -82,12 +87,11 @@ public class MainActivity extends Activity {
     return ret;
   }
 
-  private GridView renderBoard(final Response response) {
+  private void renderBoard(final Response response) {
     final Response.Solution bestSolution = getBestSolution(response);
     final ByteString data = response.getBoard().getData();
-    GridView grid = new GridView(this);
-    grid.setNumColumns(GRID_SIZE);
-    grid.setAdapter(
+    gridView.setNumColumns(GRID_SIZE);
+    gridView.setAdapter(
         new ListAdapter() {
           @Override
           public int getCount() {
@@ -179,6 +183,5 @@ public class MainActivity extends Activity {
           @Override
           public void unregisterDataSetObserver(DataSetObserver observer) {}
         });
-    return grid;
   }
 }
