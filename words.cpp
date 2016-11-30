@@ -14,6 +14,7 @@ int main(int argc, char** argv) {
 
   Recogniser recogniser(nearest);
   cv::Mat image = cv::imread(argv[1], 0);
+  cv::bitwise_not(image, image);
   vector<char> grid = recogniser.RecogniseGrid(image);
   vector<char> rack = recogniser.RecogniseRack(image);
 

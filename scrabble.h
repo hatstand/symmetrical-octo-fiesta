@@ -4,7 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
 #include <vector>
 
@@ -91,9 +93,6 @@ class Scrabble {
   std::string GetRightConnectingCharacters(std::pair<int, int> pos) const;
   std::string GetUpConnectingCharacters(std::pair<int, int> pos) const;
   std::string GetDownConnectingCharacters(std::pair<int, int> pos) const;
-  void ExpandLeft(std::string s, std::pair<int, int> pos,
-                  const std::vector<char>& tiles) const;
-  bool CrossCheck(const std::string& s, std::pair<int, int> pos) const;
   bool CrossCheck(const Solution& solution) const;
   char get(int x, int y) const;
 
@@ -105,12 +104,14 @@ class Scrabble {
   bool TryPosition(const Solution& solution,
                    const std::vector<char>& rack) const;
   int Score(const Solution& solution, const std::vector<char>& rack) const;
+  std::map<std::pair<int, int>, std::set<char>> BuildCrossCheck() const;
 
   std::vector<char> board_;
 
   std::unique_ptr<dawgdic::Dawg> dawg_;
   std::unique_ptr<dawgdic::Dictionary> dictionary_;
   std::unique_ptr<dawgdic::Guide> guide_;
+  std::map<std::pair<int, int>, std::set<char>> cross_check_;
 };
 
 #endif  // SCRABBLE_H

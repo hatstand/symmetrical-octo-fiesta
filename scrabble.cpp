@@ -128,13 +128,15 @@ Scrabble::Scrabble(const vector<char>& board)
     : board_(board),
       dawg_(BuildDawg()),
       dictionary_(BuildDictionary(*dawg_)),
-      guide_(BuildGuide(*dawg_, *dictionary_)) {}
+      guide_(BuildGuide(*dawg_, *dictionary_)),
+      cross_check_(BuildCrossCheck()) {}
 
 Scrabble::Scrabble(const vector<char>& board, const vector<string> words)
     : board_(board),
       dawg_(BuildDawg(words)),
       dictionary_(BuildDictionary(*dawg_)),
-      guide_(BuildGuide(*dawg_, *dictionary_)) {}
+      guide_(BuildGuide(*dawg_, *dictionary_)),
+      cross_check_(BuildCrossCheck()) {}
 
 Scrabble::~Scrabble() {}
 
@@ -177,6 +179,7 @@ vector<Scrabble::Solution> Scrabble::FindBestMove(
   }
 
   board_ = Transpose(board_);
+  cross_check_ = BuildCrossCheck();
   empty_tiles = FindEmptyTiles();
   vector<Solution> column_solutions = TryPositions(empty_tiles, rack);
   auto best_column_solution = std::max_element(
@@ -203,7 +206,7 @@ set<char> GetPotentialStartingLetters(const vector<char>& rack) {
     if (IsRealCharacter(c)) {
       ret.insert(c);
     } else if (c == '4') {
-      for (char x = 'a'; x < 'z'; ++x) {
+      for (char x = 'a'; x <= 'z'; ++x) {
         ret.insert(x);
         return ret;
       }
@@ -370,49 +373,42 @@ int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
   return score * word_multiplier + extra_words_score;
 }
 
-void Scrabble::ExpandLeft(string s, pair<int, int> pos,
-                          const vector<char>& tiles) const {
-  pair<int, int> left_pos = make_pair(pos.first - 1, pos.second);
-  if (left_pos.first < 0 || HasPlacedTile(left_pos.first, left_pos.second)) {
-    return;
-  }
-
-  string left = GetLeftConnectingCharacters(left_pos);
-
-  for (char tile : tiles) {
-    string new_word = left + tile + s + GetRightConnectingCharacters(make_pair(
-                                            pos.first + s.size(), pos.second));
-    vector<string> options = CompleteKeys(*dictionary_, *guide_, new_word);
-    if (!options.empty() && CrossCheck(new_word, left_pos)) {
-      cout << new_word << " valid at: " << left_pos.first << ","
-           << left_pos.second << endl;
-
-      std::vector<char> remaining_tiles(tiles);
-      remaining_tiles.erase(
-          find(remaining_tiles.begin(), remaining_tiles.end(), tile));
-      if (!remaining_tiles.empty()) {
-        ExpandLeft(new_word, left_pos, remaining_tiles);
-      }
-    }
-  }
-}
-
 bool Scrabble::CrossCheck(const Solution& solution) const {
-  return CrossCheck(solution.word(), make_pair(solution.x(), solution.y()));
-}
-
-bool Scrabble::CrossCheck(const string& s, pair<int, int> start_pos) const {
-  int x = start_pos.first;
-  int y = start_pos.second;
-  for (int i = 0; i < s.size(); ++i) {
-    pair<int, int> current = make_pair(x + i, y);
-    string down_word = GetUpConnectingCharacters(current) + s[i] +
-                       GetDownConnectingCharacters(current);
-    if (down_word.size() > 1 && !dictionary_->Contains(down_word.c_str())) {
+  for (int i = 0; i < solution.word().size(); ++i) {
+    pair<int, int> pos = make_pair(solution.x() + i, solution.y());
+    const auto& it = cross_check_.find(pos);
+    if (it == cross_check_.end()) {
+      continue;
+    }
+    if (it->second.find(solution.word()[i]) == it->second.end()) {
       return false;
     }
   }
   return true;
+}
+
+map<pair<int, int>, set<char>> Scrabble::BuildCrossCheck() const {
+  map<pair<int, int>, set<char>> ret;
+  for (const auto& pos : FindAnchors()) {
+    string prefix = GetUpConnectingCharacters(pos);
+    string suffix = GetDownConnectingCharacters(pos);
+    set<char> valid;
+    if (prefix.empty() && suffix.empty()) {
+      for (char x = 'a'; x <= 'z'; ++x) {
+        valid.insert(x);
+      }
+      continue;
+    }
+
+    for (char c = 'a'; c <= 'z'; ++c) {
+      string word = prefix + c + suffix;
+      if (dictionary_->Contains(word.c_str())) {
+        valid.insert(c);
+      }
+    }
+    ret[pos] = valid;
+  }
+  return ret;
 }
 
 bool Scrabble::IsValidPlacement(char c, pair<int, int> pos) const {
