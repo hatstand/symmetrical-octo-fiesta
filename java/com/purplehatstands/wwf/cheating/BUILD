@@ -1,14 +1,18 @@
 android_binary(
     name = "cheating",
+    srcs = ["MainActivity.java"],
     assets = [":assets"],
     assets_dir = "assets",
     manifest = "AndroidManifest.xml",
+    resource_files = glob(["res/**/*"]),
     deps = [
-        ":MainActivity",
+        ":Grid",
         ":jni",
         ":protos",
         "//:knearest",
         "//:scrabble",
+        "@org_pubref_rules_protobuf//java:grpc_compiletime_deps",
+        "@org_pubref_rules_protobuf//java:netty_runtime_deps",
     ],
 )
 
@@ -19,18 +23,6 @@ android_library(
         ":protos",
         "@com_google_guava_guava//jar",
         "@org_pubref_rules_protobuf//java:grpc_compiletime_deps",
-    ],
-)
-
-android_library(
-    name = "MainActivity",
-    srcs = ["MainActivity.java"],
-    visibility = ["//java:__pkg__"],
-    deps = [
-        ":Grid",
-        ":protos",
-        "@org_pubref_rules_protobuf//java:grpc_compiletime_deps",
-        "@org_pubref_rules_protobuf//java:netty_runtime_deps",
     ],
 )
 

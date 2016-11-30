@@ -31,18 +31,9 @@ public class MainActivity extends Activity {
   @Override
   public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
-
-    layout = new LinearLayout(this);
-    layout.setOrientation(LinearLayout.VERTICAL);
-    setContentView(layout);
-
-    view = new TextView(this);
-    layout.addView(view);
-    view.setText("Thinking...");
-
-    gridView = new GridView(this);
-    layout.addView(gridView);
-
+    setContentView(R.layout.main);
+    this.view = (TextView) findViewById(R.id.text);
+    this.gridView = (GridView) findViewById(R.id.grid);
     grid = new Grid(getAssets());
   }
 

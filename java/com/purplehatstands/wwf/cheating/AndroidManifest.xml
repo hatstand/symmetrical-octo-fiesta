@@ -2,7 +2,7 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
   package="com.purplehatstands.wwf.cheating">
 
-  <uses-permission android:name="android.permission.INTERNET"/>
+  <uses-sdk android:minSdkVersion="16" android:targetSdkVersion="23" />
 
   <application
     android:label="Cheating"

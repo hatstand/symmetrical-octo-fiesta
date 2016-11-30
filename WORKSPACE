@@ -58,8 +58,8 @@ android_sdk_repository(
 
 android_ndk_repository(
     name = "androidndk",
-    api_level = 21,
-    path = "/usr/local/google/home/johnmaguire/build/android-ndk-r11c",
+    api_level = 23,
+    path = "/usr/local/google/home/johnmaguire/build/android-ndk-r13b",
 )
 
 maven_jar(
