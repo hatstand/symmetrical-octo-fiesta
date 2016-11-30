@@ -6,7 +6,8 @@
 
   <application
     android:label="Cheating"
-    android:allowBackup="true">
+    android:allowBackup="true"
+    android:theme="@android:style/Theme.Material">
     <activity android:name=".MainActivity">
       <intent-filter>
         <action android:name="android.intent.action.MAIN" />

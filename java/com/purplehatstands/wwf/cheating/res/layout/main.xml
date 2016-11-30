@@ -6,8 +6,9 @@
   <ProgressBar android:id="@+id/progress"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
-    style="@android:style/Widget.ProgressBar.Large"
-    android:layout_marginRight="5dp" />
+    android:layout_marginTop="10dp"
+    style="@android:style/Widget.Material.ProgressBar.Large"
+    android:layout_gravity="center" />
   <GridView android:id="@+id/grid"
     android:layout_width="wrap_content"
     android:layout_height="wrap_content" />
