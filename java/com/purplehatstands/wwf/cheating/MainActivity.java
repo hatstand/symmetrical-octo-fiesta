@@ -4,6 +4,7 @@ import android.app.Activity;
 import android.content.Intent;
 import android.database.DataSetObserver;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -11,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.GridView;
 import android.widget.LinearLayout;
 import android.widget.ListAdapter;
+import android.widget.ProgressBar;
 import android.widget.TextView;
 import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
@@ -26,6 +28,7 @@ public class MainActivity extends Activity {
   private LinearLayout layout;
   private TextView view;
   private GridView gridView;
+  private ProgressBar progress;
   private Grid grid;
 
   @Override
@@ -34,6 +37,7 @@ public class MainActivity extends Activity {
     setContentView(R.layout.main);
     this.view = (TextView) findViewById(R.id.text);
     this.gridView = (GridView) findViewById(R.id.grid);
+    this.progress = (ProgressBar) findViewById(R.id.progress);
     grid = new Grid(getAssets());
   }
 
@@ -46,15 +50,26 @@ public class MainActivity extends Activity {
 
     if (Intent.ACTION_SEND.equals(intent.getAction())) {
       Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
-      try {
-        InputStream stream = getContentResolver().openInputStream(imageUri);
-        byte[] bytes = ByteStreams.toByteArray(stream);
-        Response response = grid.solve(getAssets(), bytes);
-        view.setText(response.toString());
-        renderBoard(response);
-      } catch (IOException e) {
-        e.printStackTrace();
-      }
+      new AsyncTask<Uri, Void, Response>() {
+        @Override
+        protected Response doInBackground(Uri... uris) {
+          Uri uri = uris[0];
+          try {
+            InputStream stream = getContentResolver().openInputStream(uri);
+            byte[] bytes = ByteStreams.toByteArray(stream);
+            return grid.solve(getAssets(), bytes);
+          } catch (IOException e) {
+            throw new RuntimeException(e);
+          }
+        }
+
+        @Override
+        protected void onPostExecute(Response result) {
+          progress.setVisibility(View.GONE);
+          view.setText(result.toString());
+          renderBoard(result);
+        }
+      }.execute(imageUri);
     }
   }
 
