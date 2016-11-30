@@ -1,6 +1,7 @@
 package(default_visibility = ["//visibility:public"])
 
 load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_library")
+load("@org_pubref_rules_protobuf//cpp:rules.bzl", "cc_proto_compile")
 load("@org_pubref_rules_protobuf//java:rules.bzl", "java_proto_compile")
 
 cc_binary(
@@ -104,13 +105,33 @@ cc_binary(
 
 cc_proto_library(
     name = "service",
-    protos = ["service.proto"],
+    protos = [
+        "messages.proto",
+        "service.proto",
+    ],
     with_grpc = True,
+)
+
+cc_proto_compile(
+    name = "messages",
+    protos = ["messages.proto"],
+    with_grpc = False,
+)
+
+cc_library(
+    name = "messages_lib",
+    srcs = [":messages"],
+    deps = [
+        "//external:protobuf_clib",
+    ],
 )
 
 java_proto_compile(
     name = "service_java",
-    protos = ["service.proto"],
+    protos = [
+        "messages.proto",
+        "service.proto",
+    ],
     visibility = ["//visibility:public"],
     with_grpc = True,
 )

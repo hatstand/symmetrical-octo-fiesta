@@ -12,6 +12,7 @@
 
 #include "java/com/purplehatstands/wwf/jni/images.h"
 #include "knearest.h"
+#include "messages.pb.h"
 #include "recogniser.h"
 #include "scrabble.h"
 
@@ -89,6 +90,7 @@ jbyteArray RecogniseRack(JNIEnv* env, jclass, jobject asset_manager,
   Recogniser recogniser(*nearest);
   __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising rack");
   vector<char> rack = recogniser.RecogniseRack(image);
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognised: %s", rack.data());
 
   jbyteArray ret = env->NewByteArray(rack.size());
   jbyte* ret_data = env->GetByteArrayElements(ret, nullptr);
@@ -105,6 +107,7 @@ vector<string> LoadWords(JNIEnv* env, jobjectArray words) {
     ret.push_back(JStringToStdString(env, s));
     env->DeleteLocalRef(s);
   }
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Loaded %d words", ret.size());
   return ret;
 }
 
@@ -117,29 +120,57 @@ string Format(const std::string& format_string, Args... args) {
   return ret;
 }
 
-jstring Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
-              jbyteArray data, jobjectArray words) {
+jbyteArray Solve(JNIEnv* env, jclass, jobject asset_manager, jstring path_jni,
+                 jbyteArray data, jobjectArray words) {
   unique_ptr<KNearest> nearest(LoadModel(env, asset_manager, path_jni));
   cv::Mat image = DecodeImage(env, data);
+  cv::bitwise_not(image, image);
   Recogniser recogniser(*nearest);
-  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising rack");
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising grid");
   vector<char> grid = recogniser.RecogniseGrid(image);
+  for (int y = 0; y < 15; ++y) {
+    string line;
+    for (int x = 0; x < 15; ++x) {
+      line += grid[y * 15 + x];
+    }
+    __android_log_print(ANDROID_LOG_INFO, kTag, "%s", line.c_str());
+  }
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognising rack");
   vector<char> rack = recogniser.RecogniseRack(image);
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Recognised: %s", rack.data());
 
   Scrabble scrabble(grid, LoadWords(env, words));
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Finding solutions");
   vector<Scrabble::Solution> solutions = scrabble.FindBestMove(rack);
-  string ret;
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Found %d solutions",
+                      solutions.size());
+
+  words::Response response;
   for (const auto& solution : solutions) {
     __android_log_print(ANDROID_LOG_INFO, kTag, "Play %s at (%d,%d)",
                         solution.word().c_str(), solution.x(), solution.y());
 
-    ret += Format("%s at (%d, %d) for %d points", solution.word().c_str(),
-                  solution.x(), solution.y(), solution.score());
-    ret += "\n";
+    words::Response::Solution* s = response.add_solution();
+    s->set_x(solution.x());
+    s->set_y(solution.y());
+    s->set_direction(solution.direction() ==
+                             Scrabble::Solution::Direction::COLUMN
+                         ? words::Response::Solution::COLUMN
+                         : words::Response::Solution::ROW);
+    s->set_word(solution.word());
+    s->set_score(solution.score());
   }
 
-  jstring jret = env->NewStringUTF(ret.c_str());
-  return jret;
+  __android_log_print(ANDROID_LOG_INFO, kTag, "Finished: %s",
+                      response.DebugString().c_str());
+
+  string serialized;
+  response.SerializeToString(&serialized);
+  jbyteArray ret = env->NewByteArray(serialized.size());
+  jbyte* ret_data = env->GetByteArrayElements(ret, nullptr);
+  copy(serialized.begin(), serialized.end(), ret_data);
+  env->ReleaseByteArrayElements(ret, ret_data, 0);
+  return ret;
 }
 
 static const JNINativeMethod kGridMethods[] = {
@@ -151,7 +182,7 @@ static const JNINativeMethod kGridMethods[] = {
      reinterpret_cast<void*>(&RecogniseRack)},
     {"solve",
      "(Landroid/content/res/AssetManager;Ljava/lang/String;[B[Ljava/lang/"
-     "String;)Ljava/lang/String;",
+     "String;)[B",
      reinterpret_cast<void*>(&Solve)},
 };
 
@@ -163,7 +194,7 @@ extern "C" JNIEXPORT jint JNICALL JNI_OnLoad(JavaVM* vm, void*) {
     return -1;
   }
 
-  jclass grid_clazz = env->FindClass("com/purplehatstands/wwf/Grid");
+  jclass grid_clazz = env->FindClass("com/purplehatstands/wwf/cheating/Grid");
   env->RegisterNatives(grid_clazz, kGridMethods,
                        extent<decltype(kGridMethods)>::value);
 

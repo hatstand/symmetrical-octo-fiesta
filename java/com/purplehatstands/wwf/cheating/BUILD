@@ -16,7 +16,9 @@ android_library(
     name = "Grid",
     srcs = ["Grid.java"],
     deps = [
+        ":protos",
         "@com_google_guava_guava//jar",
+        "@org_pubref_rules_protobuf//java:grpc_compiletime_deps",
     ],
 )
 
@@ -50,6 +52,7 @@ cc_library(
     ],
     deps = [
         "//:knearest",
+        "//:messages_lib",
         "//:recogniser",
         "//:scrabble",
         "//java/com/purplehatstands/wwf/jni:images",

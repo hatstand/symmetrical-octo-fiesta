@@ -16,7 +16,7 @@ import com.google.common.io.ByteStreams;
 import com.google.protobuf.ByteString;
 import java.io.IOException;
 import java.io.InputStream;
-import words.Service.Response;
+import words.Messages.Response;
 
 public class MainActivity extends Activity {
   private static final String TAG = "MainActivity";
@@ -54,8 +54,8 @@ public class MainActivity extends Activity {
       try {
         InputStream stream = getContentResolver().openInputStream(imageUri);
         byte[] bytes = ByteStreams.toByteArray(stream);
-        String advice = grid.solve(getAssets(), bytes);
-        view.setText(advice);
+        Response response = grid.solve(getAssets(), bytes);
+        view.setText(response.toString());
       } catch (IOException e) {
         e.printStackTrace();
       }
