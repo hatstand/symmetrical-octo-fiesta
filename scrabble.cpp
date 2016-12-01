@@ -138,7 +138,10 @@ Scrabble::Scrabble(const vector<char>& board, const vector<string> words)
       guide_(BuildGuide(*dawg_, *dictionary_)),
       cross_check_(BuildCrossCheck()) {}
 
-Scrabble::~Scrabble() {}
+Scrabble::~Scrabble() {
+  std::for_each(cross_check_.begin(), cross_check_.end(),
+                [](set<char>* e) { delete e; });
+}
 
 vector<Scrabble::Solution> Scrabble::TryPositions(
     const vector<pair<int, int>>& positions, const vector<char>& rack) const {
@@ -179,6 +182,8 @@ vector<Scrabble::Solution> Scrabble::FindBestMove(
   }
 
   board_ = Transpose(board_);
+  std::for_each(cross_check_.begin(), cross_check_.end(),
+                [](set<char>* e) { delete e; });
   cross_check_ = BuildCrossCheck();
   empty_tiles = FindEmptyTiles();
   vector<Solution> column_solutions = TryPositions(empty_tiles, rack);
@@ -375,38 +380,39 @@ int Scrabble::Score(const Solution& solution, const vector<char>& r) const {
 
 bool Scrabble::CrossCheck(const Solution& solution) const {
   for (int i = 0; i < solution.word().size(); ++i) {
-    pair<int, int> pos = make_pair(solution.x() + i, solution.y());
-    const auto& it = cross_check_.find(pos);
-    if (it == cross_check_.end()) {
-      continue;
+    if (solution.x() + i >= kGridSize) {
+      return false;
     }
-    if (it->second.find(solution.word()[i]) == it->second.end()) {
+    pair<int, int> pos = make_pair(solution.x() + i, solution.y());
+    set<char>* valid = cross_check_[pos.first + pos.second * kGridSize];
+    if (valid != nullptr && valid->find(solution.word()[i]) == valid->end()) {
       return false;
     }
   }
   return true;
 }
 
-map<pair<int, int>, set<char>> Scrabble::BuildCrossCheck() const {
-  map<pair<int, int>, set<char>> ret;
+vector<set<char>*> Scrabble::BuildCrossCheck() const {
+  vector<set<char>*> ret(kGridSize * kGridSize, nullptr);
   for (const auto& pos : FindAnchors()) {
+    set<char>* valid = new set<char>;
     string prefix = GetUpConnectingCharacters(pos);
     string suffix = GetDownConnectingCharacters(pos);
-    set<char> valid;
     if (prefix.empty() && suffix.empty()) {
       for (char x = 'a'; x <= 'z'; ++x) {
-        valid.insert(x);
+        valid->insert(x);
       }
+      ret[pos.first + pos.second * kGridSize] = valid;
       continue;
     }
 
     for (char c = 'a'; c <= 'z'; ++c) {
       string word = prefix + c + suffix;
       if (dictionary_->Contains(word.c_str())) {
-        valid.insert(c);
+        valid->insert(c);
       }
     }
-    ret[pos] = valid;
+    ret[pos.first + pos.second * kGridSize] = valid;
   }
   return ret;
 }

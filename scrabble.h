@@ -104,14 +104,14 @@ class Scrabble {
   bool TryPosition(const Solution& solution,
                    const std::vector<char>& rack) const;
   int Score(const Solution& solution, const std::vector<char>& rack) const;
-  std::map<std::pair<int, int>, std::set<char>> BuildCrossCheck() const;
+  std::vector<std::set<char>*> BuildCrossCheck() const;
 
   std::vector<char> board_;
 
   std::unique_ptr<dawgdic::Dawg> dawg_;
   std::unique_ptr<dawgdic::Dictionary> dictionary_;
   std::unique_ptr<dawgdic::Guide> guide_;
-  std::map<std::pair<int, int>, std::set<char>> cross_check_;
+  std::vector<std::set<char>*> cross_check_;
 };
 
 #endif  // SCRABBLE_H
