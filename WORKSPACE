@@ -19,9 +19,9 @@ bind(
 new_http_archive(
     name = "libpng_http",
     build_file = "BUILD.libpng",
-    sha256 = "81bfc8f16ed125622c0c5ad44eeffda19e7a7c7e32f47e43c8932bf32deae7cc",
-    strip_prefix = "libpng-1.6.26",
-    url = "http://vorboss.dl.sourceforge.net/project/libpng/libpng16/1.6.26/libpng-1.6.26.tar.gz",
+    sha256 = "e30bf36cd5882e017c23a5c6a79a9aa1a744dd5841bb45ff7035ec6e3b3096b8",
+    strip_prefix = "libpng-1.6.29",
+    url = "http://download.sourceforge.net/libpng/libpng-1.6.29.tar.gz",
 )
 
 bind(
