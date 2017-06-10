@@ -51,15 +51,13 @@ java_proto_repositories()
 
 android_sdk_repository(
     name = "androidsdk",
-    api_level = 25,
-    build_tools_version = "25.0.0",
-    path = "/usr/local/google/home/johnmaguire/build/android-sdk-linux",
+    api_level = 26,
+    build_tools_version = "26.0.0",
 )
 
 android_ndk_repository(
     name = "androidndk",
-    api_level = 23,
-    path = "/usr/local/google/home/johnmaguire/build/android-ndk-r13b",
+    api_level = 25,
 )
 
 maven_jar(
