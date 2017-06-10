@@ -52,7 +52,7 @@ java_proto_repositories()
 android_sdk_repository(
     name = "androidsdk",
     api_level = 26,
-    build_tools_version = "26.0.0",
+    build_tools_version = "25.0.3",
 )
 
 android_ndk_repository(
