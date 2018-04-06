@@ -32,7 +32,8 @@ public class MainActivity extends Activity {
   private Grid grid;
 
   @Override
-  public void onCreate(Bundle savedInstanceState) {
+  public void onCreate(Bundle savedInstanceState)
+  {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.main);
     this.view = (TextView) findViewById(R.id.text);
@@ -43,12 +44,13 @@ public class MainActivity extends Activity {
 
   @Override
   public void onResume() {
-    super.onResume();
-    Intent intent = getIntent();
+      super.onResume();
+      Intent intent = getIntent();
 
-    Log.d(TAG, "Resuming: " + intent);
+  Log.d(TAG, "Resuming: " +
+      intent);
 
-    if (Intent.ACTION_SEND.equals(intent.getAction())) {
+    if(Intent.ACTION_SEND.equals(intent.getAction())) {
       Uri imageUri = (Uri) intent.getParcelableExtra(Intent.EXTRA_STREAM);
       new AsyncTask<Uri, Void, Response>() {
         @Override
